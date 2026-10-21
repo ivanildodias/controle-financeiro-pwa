@@ -45,6 +45,14 @@
     if (fonteSalva) ajustarTamanhoFonte(fonteSalva, false); 
     else ajustarTamanhoFonte('compacto', false);
 
+    document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('finance-show-resumo') === 'true') toggleResumoFiltros(true);
+    if (localStorage.getItem('finance-modo-credito') === 'true') {
+      const chk = document.getElementById('chkModoCredito');
+      if(chk) chk.checked = true;
+    }
+  });
+
     verificarConexao();
 
     window.addEventListener('scroll', function() {
@@ -1316,14 +1324,6 @@
     localStorage.setItem('finance-modo-credito', isChecked);
     aplicarFiltros(false); 
   }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('finance-show-resumo') === 'true') toggleResumoFiltros(true);
-    if (localStorage.getItem('finance-modo-credito') === 'true') {
-      const chk = document.getElementById('chkModoCredito');
-      if(chk) chk.checked = true;
-    }
-  });
 
   // ==========================================================================
   // ⚙️ MOTOR DE FILTROS E PESQUISA (MODULARIZADO)
@@ -3491,7 +3491,7 @@
           <span>Matriz Anual (${anoPivot})</span>
         </div>
         <div class="flex items-center gap-2">
-          <button id="btnTopPivotDetalhes" onclick="toggleFullScreenPivot()" class="btn btn-secundario px-3 py-1 text-xs font-bold hidden flex items-center gap-1">
+          <button id="btnTopPivotDetalhes" onclick="toggleFullScreenPivot()" class="btn btn-secundario hidden px-3 py-1 text-xs font-bold flex items-center gap-1">
              Ver Detalhes <span class="material-icons text-sm">open_in_full</span>
           </button>
           <button id="btnTopPivotFull" onclick="toggleFullScreenPivot()" class="btn-icone text-suave flex items-center justify-center" title="Tela Cheia">
@@ -3587,19 +3587,6 @@
         <thead>${theadHtml}</thead>
         <tbody>${tbodyHtml}</tbody>
         <tfoot>${htmlTotalRec}${htmlTotalDesp}${htmlBalanco}</tfoot>
-      </table>
-      <div id="btnPivotMobile" class="w-full mt-3 pt-3 border-t border-dashed mobile-only-flex justify-center" style="border-color: var(--borda);">
-        <button class="btn btn-secundario flex items-center justify-center gap-2 px-5 py-2 text-sm w-full" onclick="toggleFullScreenPivot()">
-          Ver detalhes <span class="material-icons text-base">arrow_forward</span>
-        </button>
-      </div>`;
-    
-    // O Botão de "Ver Detalhes" saiu daqui e foi lá para o topo!
-    boxPivot.innerHTML = `
-      <table class="data-table pivot-table">
-        <thead>${theadHtml}</thead>
-        <tbody>${tbodyHtml}</tbody>
-        <tfoot>${htmlTotalRec}${htmlTotalDesp}${htmlBalanco}</tfoot>
       </table>`;
   }
 
@@ -3665,77 +3652,50 @@
   }
 
   // ==========================================================================
-  // 🌐 18. COMUNICADOR UNIVERSAL E AUTENTICAÇÃO HÍBRIDA
+  // 🌐 18. COMUNICADOR HEADLESS E AUTENTICAÇÃO API (VERCEL ONLY)
   // ==========================================================================
 
   function verificarConexao() {
-    const isGoogle = (typeof google !== 'undefined' && google.script && google.script.run);
     const token = localStorage.getItem('finance_api_token');
     const url = localStorage.getItem('finance_api_url');
     
     const overlay = document.getElementById('loginOverlay');
     const appContainer = document.querySelector('.app-container');
-    const grupoUrl = document.getElementById('grupoConfigUrl');
-    const grupoToken = document.getElementById('grupoConfigToken');
     const boxSair = document.getElementById('boxDesconectarApp');
 
-    // Manipula a grade dependendo de onde o app abriu
-    if (isGoogle) {
-        if(document.getElementById('grupoUrlApi')) document.getElementById('grupoUrlApi').style.display = 'none';
-        if(grupoUrl) grupoUrl.style.display = 'none';
-        if(grupoToken) grupoToken.style.gridColumn = 'span 2'; // Estica o campo da senha
-        
-        if (token) {
-            overlay.classList.add('hidden');
-            appContainer.style.display = 'flex';
-            if(boxSair) boxSair.classList.remove('hidden');
-            if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
-            carregarParametrosIniciais();
-        } else {
-            appContainer.style.display = 'none';
-            overlay.classList.remove('hidden');
-        }
+    if (url && token) {
+        overlay.classList.add('hidden');
+        appContainer.style.display = 'flex';
+        if(boxSair) boxSair.classList.remove('hidden');
+        if(document.getElementById('inpConfigApiUrl')) document.getElementById('inpConfigApiUrl').value = url;
+        if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
+        carregarParametrosIniciais();
     } else {
-        if(document.getElementById('grupoUrlApi')) document.getElementById('grupoUrlApi').style.display = 'flex';
-        if(grupoUrl) grupoUrl.style.display = 'flex';
-        if(grupoToken) grupoToken.style.gridColumn = 'span 1'; // Divide com a URL
-        
-        if (url && token) {
-            overlay.classList.add('hidden');
-            appContainer.style.display = 'flex';
-            if(boxSair) boxSair.classList.remove('hidden');
-            if(document.getElementById('inpConfigApiUrl')) document.getElementById('inpConfigApiUrl').value = url;
-            if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
-            carregarParametrosIniciais();
-        } else {
-            appContainer.style.display = 'none';
-            overlay.classList.remove('hidden');
-        }
+        appContainer.style.display = 'none';
+        overlay.classList.remove('hidden');
     }
   }
 
   function conectarApp() {
-    const isGoogle = (typeof google !== 'undefined' && google.script && google.script.run);
     const token = document.getElementById('inpApiToken').value.trim();
     const url = document.getElementById('inpApiUrl').value.trim();
     const btn = document.getElementById('btnLoginSystem');
     
-    if (!token || (!isGoogle && !url)) {
-      mostrarNotificacao("Preencha as credenciais obrigatórias.", "aviso");
+    if (!token || !url) {
+      mostrarNotificacao("Preencha a URL e o Token da sua planilha.", "aviso");
       return;
     }
     
     if (btn) { btn.disabled = true; btn.innerHTML = "Autenticando..."; }
 
-    if (isGoogle) { localStorage.setItem('finance_api_token', token); } 
-    else { localStorage.setItem('finance_api_url', url); localStorage.setItem('finance_api_token', token); }
+    localStorage.setItem('finance_api_url', url);
+    localStorage.setItem('finance_api_token', token);
     
     chamarBackend('obterDadosFormularioConfig')
-      .then(() => {
+      .then(dados => {
          if (btn) { btn.disabled = false; btn.innerHTML = `<span class="material-icons">login</span> Desbloquear Sistema`; }
-         mostrarNotificacao("Conexão autorizada!", "sucesso");
+         mostrarNotificacao("Conexão autorizada! Carregando dados...", "sucesso");
          
-         // Try Catch Interno: Impede que erros visuais chamem a notificação de senha errada
          try {
              document.getElementById('loginOverlay').classList.add('hidden');
              document.querySelector('.app-container').style.display = 'flex';
@@ -3747,48 +3707,55 @@
              if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
              
              navigateToSection('dashboard');
-             carregarParametrosIniciais();
-         } catch (e) {
-             console.error("Erro visual inofensivo após login: ", e);
-         }
+             
+             // OTIMIZAÇÃO: Usa os dados recebidos do teste de login para pular uma requisição!
+             configContas = dados.contas || [];
+             configCategorias = dados.categorias || [];
+             configModelos = dados.modelos || []; 
+             renderizarSeletoresFormulario();
+             carregarLancamentosDoSheets();
+             
+         } catch (e) { console.error(e); }
       })
       .catch(err => {
          if (btn) { btn.disabled = false; btn.innerHTML = `<span class="material-icons">login</span> Desbloquear Sistema`; }
          localStorage.removeItem('finance_api_token');
-         if (!isGoogle) localStorage.removeItem('finance_api_url');
+         localStorage.removeItem('finance_api_url');
          mostrarNotificacao("Acesso Negado: Credenciais inválidas.", "erro");
       });
   }
 
   function salvarConfiguracoesConexao() {
-    const isGoogle = (typeof google !== 'undefined' && google.script && google.script.run);
     const url = document.getElementById('inpConfigApiUrl').value.trim();
     const token = document.getElementById('inpConfigApiToken').value.trim();
     const btn = document.getElementById('btnSalvarCredenciais');
 
-    if (!token || (!isGoogle && !url)) {
-        mostrarNotificacao("Preencha os campos obrigatórios.", "aviso");
+    if (!token || !url) {
+        mostrarNotificacao("Preencha a URL e o Token.", "aviso");
         return;
     }
 
     if (btn) { btn.disabled = true; btn.innerHTML = "Verificando..."; }
 
-    // Salva as credenciais antigas em caso de erro
     const oldUrl = localStorage.getItem('finance_api_url');
     const oldToken = localStorage.getItem('finance_api_token');
 
-    if (isGoogle) { localStorage.setItem('finance_api_token', token); } 
-    else { localStorage.setItem('finance_api_url', url); localStorage.setItem('finance_api_token', token); }
+    localStorage.setItem('finance_api_url', url);
+    localStorage.setItem('finance_api_token', token);
 
     chamarBackend('obterDadosFormularioConfig')
-      .then(() => {
+      .then(dados => {
          if (btn) { btn.disabled = false; btn.innerHTML = `<span class="material-icons text-base">security</span> <span class="texto-oculto-celular">Validar Credenciais</span>`; }
          mostrarNotificacao("Credenciais validadas e atualizadas!", "sucesso");
-         carregarParametrosIniciais();
+         
+         configContas = dados.contas || [];
+         configCategorias = dados.categorias || [];
+         configModelos = dados.modelos || []; 
+         renderizarSeletoresFormulario();
+         carregarLancamentosDoSheets(); // Recarrega os dados sem piscar a tela
       })
       .catch(err => {
          if (btn) { btn.disabled = false; btn.innerHTML = `<span class="material-icons text-base">security</span> <span class="texto-oculto-celular">Validar Credenciais</span>`; }
-         // Reverte a alteração de segurança
          if (oldToken) localStorage.setItem('finance_api_token', oldToken);
          if (oldUrl) localStorage.setItem('finance_api_url', oldUrl);
          
@@ -3812,25 +3779,12 @@
     if (document.getElementById('inpApiToken')) document.getElementById('inpApiToken').value = '';
     if (document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = '';
     
-    // Limpa os dados em memória para evitar vazamento
     allLancamentos = []; dadosFiltrados = []; dadosFuturos = [];
     configContas = []; configCategorias = []; configModelos = [];
   }
 
   function chamarBackend(acao, dados = {}) {
     return new Promise((resolve, reject) => {
-      
-      const isGoogle = (typeof google !== 'undefined' && google.script && google.script.run);
-      
-      if (isGoogle) {
-        // 🟢 ROTA GOOGLE
-        google.script.run
-          .withSuccessHandler(resposta => resolve(resposta))
-          .withFailureHandler(erro => reject(erro))
-          [acao](dados); 
-          
-      } else {
-        // 🔵 ROTA VERCEL (PWA)
         const urlSegura = localStorage.getItem('finance_api_url');
         const tokenSeguro = localStorage.getItem('finance_api_token');
         
@@ -3847,15 +3801,14 @@
         .then(res => res.json())
         .then(json => {
           if (json.error) {
-              if(json.error.includes("Token")) desconectarApp(); // Chuta o usuário pra fora se a senha estiver errada
+              if(json.error.includes("Token") || json.error.includes("Acesso Negado")) desconectarApp(); // Kick inteligente
               reject(new Error(json.error));
           }
           else resolve(json.data); 
         })
         .catch(err => {
           console.error("Erro na API:", err);
-          reject(new Error("Falha na comunicação. O Link do Google está correto?"));
+          reject(new Error("Falha na comunicação. Verifique a URL do Google Apps Script."));
         });
-      }
     });
   }
