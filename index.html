@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <title>Meu Controle Financeiro</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Injeção do Módulo de Estilos -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <!-- ==========================================================================
+       OVERLAY DE AUTENTICAÇÃO (LOGIN HÍBRIDO)
+       ========================================================================== -->
+  <div id="loginOverlay" class="hidden flex items-center justify-center bg-principal absolute z-50 w-full h-full" style="top:0; left:0; min-height: 100vh;">
+    <div class="card-painel max-w-sm w-full shadow-inner m-5 relative">
+      <div class="text-center mb-5 mt-2">
+        <span class="material-icons text-perigo text-5xl mb-2">gpp_bad</span>
+        <h2 class="m-0 text-principal text-xl font-bold">Acesso Restrito</h2>
+        <p class="text-sm text-suave m-0 mt-1">Conecte-se à base de dados para continuar.</p>
+      </div>
+      
+      <div id="grupoUrlApi" class="form-group">
+        <label>URL do Web App (Google)</label>
+        <input type="url" id="inpApiUrl" class="form-control font-mono text-xs" placeholder="https://script.google.com/.../exec">
+      </div>
+      
+      <div class="form-group mb-5">
+        <label>Token Secreto da Planilha</label>
+        <input type="password" id="inpApiToken" class="form-control" placeholder="Digite a senha">
+      </div>
+      
+      <button id="btnLoginSystem" onclick="conectarApp()" class="btn btn-primario w-full flex items-center justify-center gap-2 text-base h-41">
+        <span class="material-icons">login</span> Desbloquear Sistema
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       CONTAINER PRINCIPAL E MENU LATERAL
+       ========================================================================== -->
+  <div class="app-container" style="display: none;">
+    
+    <header class="sidebar">
+      <div class="sidebar-brand" title="Expandir/Recolher Menu" onclick="document.body.classList.toggle('menu-colapsado'); localStorage.setItem('menuStateCollapsed', document.body.classList.contains('menu-colapsado'));">
+         <span class="material-icons" style="font-size: 2.2rem; color: var(--cor-destaque);">monetization_on</span>
+         <span class="brand-text" style="color: #fff; font-size: 1.15rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Meu Controle Financeiro</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <ul class="sidebar-menu">
+          <li><a href="#" class="menu-link" data-target="dashboard"><span class="material-icons">dashboard</span><span>Dashboard</span></a></li>
+          <li><a href="#" class="menu-link" data-target="lancamentos"><span class="material-icons">swap_horiz</span><span>Lançamentos</span></a></li>
+          <li><a href="#" class="menu-link" data-target="config"><span class="material-icons">settings</span><span>Configurações</span></a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      
+      <!-- ==========================================================================
+           TELA 1: DASHBOARD
+           ========================================================================== -->
+      <section id="screen-dashboard" class="content-section">
+        
+        <!-- Cabeçalho Dashboard -->
+        <div class="section-header flex-wrap gap-3">
+          <h2 class="m-0 flex-1 min-w-250">
+            <span class="titulo-desktop flex items-center gap-2">
+              <span class="material-icons">dashboard</span> Painel Geral
+            </span>
+            <span class="mobile-only-flex items-center justify-center gap-2 text-lg w-full">
+              <span class="material-icons text-destaque" style="font-size: 1.8rem;">monetization_on</span> Meu Controle Financeiro
+            </span>
+          </h2>
+          <div class="dashboard-controles-topo flex items-center gap-3">
+            <div class="segmented-control">
+              <button id="btnVisaoMensal" class="btn-visao active" onclick="mudarVisaoDashboard('mensal')">Mensal</button>
+              <button id="btnVisaoAnual" class="btn-visao" onclick="mudarVisaoDashboard('anual')">Anual</button>
+            </div>
+            <select id="selPeriodoDashboard" class="form-control select-destaque" onchange="atualizarDadosDashboard()">
+              <option value="">Carregando...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Linha 1: Cards de Resumo (Carrossel no Mobile) -->
+        <div id="dashResumoGrid" class="dashboard-resumo-grid dashboard-area">
+          
+          <div class="dash-card dash-card-receita">
+            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">arrow_upward</span>
+            <div class="dash-card-header z-10 relative"><span>Receitas</span><span class="material-icons text-sucesso">arrow_upward</span></div>
+            <div class="dash-card-body flex-col z-10 relative">
+              <h3 id="dashValorReceita" class="text-principal">R$ 0,00</h3>
+              <div class="text-xs text-suave mt-1">Projetado: <span id="dashProjReceita" class="font-bold text-principal">R$ 0,00</span></div>
+            </div>
+          </div>
+
+          <div class="dash-card dash-card-despesa">
+            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">arrow_downward</span>
+            <div class="dash-card-header z-10 relative"><span>Despesas</span><span class="material-icons text-perigo">arrow_downward</span></div>
+            <div class="dash-card-body flex-col z-10 relative">
+              <h3 id="dashValorDespesa" class="text-principal">R$ 0,00</h3>
+              <div class="text-xs text-suave mt-1">Projetado: <span id="dashProjDespesa" class="font-bold text-principal">R$ 0,00</span></div>
+            </div>
+          </div>
+
+          <div class="dash-card dash-card-saldo">
+            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">account_balance_wallet</span>
+            <div class="dash-card-header z-10 relative"><span>Balanço</span><span class="material-icons text-destaque">account_balance_wallet</span></div>
+            <div class="dash-card-body flex-col z-10 relative">
+              <h3 id="dashValorBalanço" class="text-principal">R$ 0,00</h3>
+              <div class="text-xs text-suave mt-1">Projetado: <span id="dashProjBalanco" class="font-bold text-principal">R$ 0,00</span></div>
+            </div>
+          </div>
+
+          <div class="dash-card dash-card-total">
+            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">account_balance</span>
+            <div class="dash-card-header z-10 relative"><span>Caixa / Corrente</span><span class="material-icons text-suave">account_balance</span></div>
+            <div class="dash-card-body flex-col z-10 relative">
+              <h3 id="dashTotalCorrente" class="text-principal">R$ 0,00</h3>
+              <div class="text-xs text-suave mt-1">Projetado: <span id="dashProjCorrente" class="font-bold text-principal">R$ 0,00</span></div>
+            </div>
+          </div>
+
+          <div class="dash-card dash-card-invest">
+            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">trending_up</span>
+            <div class="dash-card-header z-10 relative"><span>Investimentos</span><span class="material-icons text-sucesso">trending_up</span></div>
+            <div class="dash-card-body flex-col z-10 relative">
+              <h3 id="dashTotalInvest" class="text-sucesso">R$ 0,00</h3>
+              <div class="text-xs text-suave mt-1">Projetado: <span id="dashProjInvest" class="font-bold text-principal">R$ 0,00</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Linha 2: Fluxo de Caixa Diário/Mensal + Painel de Notificações -->
+        <div id="dashboardAreaFluxoNotificacoes" class="dashboard-area">
+          
+          <div class="card-painel mb-0">
+            <h3 id="dashTituloFluxo" class="m-0 text-principal flex items-center gap-2 text-lg border-b pb-2 mb-3">
+              <span class="material-icons text-destaque">bar_chart</span> Fluxo de Caixa
+            </h3>
+            <div id="boxGraficoFluxo" class="w-full relative min-h-250">
+              <div class="flex items-end justify-between w-full h-full p-4 gap-2 absolute top-0 bottom-0 left-0 right-0">
+                <div class="skeleton w-full" style="height: 30%;"></div>
+                <div class="skeleton w-full" style="height: 70%;"></div>
+                <div class="skeleton w-full" style="height: 50%;"></div>
+                <div class="skeleton w-full" style="height: 90%;"></div>
+                <div class="skeleton w-full" style="height: 40%;"></div>
+                <div class="skeleton w-full" style="height: 60%;"></div>
+                <div class="skeleton w-full" style="height: 80%;"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-painel mb-0">
+            <h3 class="m-0 text-principal flex items-center gap-2 text-lg border-b pb-2 mb-3">
+              <span class="material-icons text-aviso">notifications_active</span> Alertas e Previsões
+            </h3>
+            <div id="dashListaNotificacoes" class="flex flex-col scroll-y-elegante pr-3 max-h-250">
+              <div class="flex flex-col gap-4 p-3 w-full">
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+        <!-- Linha 3: Saldos e Cartões -->
+        <div class="dashboard-area grid grid-auto-fit gap-5">
+          
+          <div class="card-painel">
+            <h3 id="dashTituloSaldos" class="m-0 text-principal flex items-center gap-2 text-lg border-b pb-2 mb-3">
+              <span class="material-icons text-sucesso">account_balance</span> Posição Patrimonial
+            </h3>
+            <div id="dashListaSaldos" class="carousel-cards py-1 w-full">
+              <div class="flex gap-3 w-full p-2 overflow-hidden">
+                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
+                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
+                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-painel">
+            <div class="flex justify-between items-center mb-3 border-b pb-2 flex-wrap gap-2">
+              <h3 id="dashTituloCredito" class="m-0 text-principal flex items-center gap-2 text-lg">
+                <span class="material-icons text-perigo">credit_card</span> Uso de Crédito
+              </h3>
+              <div id="toggleCreditoContainer" class="segmented-control">
+                <button id="btnCreditoAberta" class="btn-visao btn-visao-sm active" onclick="mudarVisaoCredito('aberta')">Fatura Ativa</button>
+                <button id="btnCreditoFiltrado" class="btn-visao btn-visao-sm" onclick="mudarVisaoCredito('filtrado')">Mês Filtrado</button>
+              </div>
+            </div>
+            <div id="dashListaCredito" class="flex flex-col gap-2 scroll-y-elegante pr-3 max-h-350">
+              <div class="flex flex-col gap-4 p-3 w-full">
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Linha 4: Gráfico e Ranking (Top 5) -->
+        <div class="dashboard-area grid grid-auto-fit gap-5">
+          
+          <div class="card-painel">
+            <div class="flex justify-between items-center mb-3 border-b pb-2 flex-wrap gap-3">
+              <h3 id="dashTituloGrafico" class="m-0 text-principal flex items-center gap-2 text-lg">
+                <span class="material-icons text-perigo">pie_chart</span> Despesas
+              </h3>
+              <!-- Flex à direita no Desktop, Grid de 2 colunas no Mobile -->
+              <div class="flex items-center gap-2 flex-wrap justify-end grid-cols-2-mobile">
+                <div class="segmented-control">
+                  <button id="btnFluxoGraficoDespesa" class="btn-visao btn-visao-sm active" onclick="mudarFluxoGrafico('DESPESA')">Despesas</button>
+                  <button id="btnFluxoGraficoReceita" class="btn-visao btn-visao-sm" onclick="mudarFluxoGrafico('RECEITA')">Receitas</button>
+                </div>
+                <div class="segmented-control">
+                  <button id="btnAgrupaCategoria" class="btn-visao btn-visao-sm active" onclick="mudarAgrupamentoDashboard('categoria')">Base</button>
+                  <button id="btnAgrupaTipo" class="btn-visao btn-visao-sm" onclick="mudarAgrupamentoDashboard('tipo')">Tipo</button>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col min-h-220 w-full" id="boxGraficoDespesas">
+              <div class="flex flex-col gap-4 p-3 w-full">
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-painel">
+            <div class="flex justify-between items-center mb-3 border-b pb-2 flex-wrap gap-3">
+              <h3 id="dashTituloRanking" class="m-0 text-principal flex items-center gap-2 text-lg">
+                <span class="material-icons text-aviso">format_list_numbered</span> Top 5 Despesas
+              </h3>
+              <div class="segmented-control">
+                <button id="btnFluxoRankingDespesa" class="btn-visao btn-visao-sm active" onclick="mudarFluxoRanking('DESPESA')">Despesas</button>
+                <button id="btnFluxoRankingReceita" class="btn-visao btn-visao-sm" onclick="mudarFluxoRanking('RECEITA')">Receitas</button>
+              </div>
+            </div>
+            <div id="dashTop5Despesas" class="flex flex-col gap-2 scroll-y-elegante pr-3 max-h-350">
+              <div class="flex flex-col gap-4 p-3 w-full">
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+                <div class="flex items-center gap-3"><div class="skeleton sk-avatar"></div><div class="flex-1"><div class="skeleton sk-title w-full"></div><div class="skeleton sk-text-sm"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Linha 5: Tabela Pivot Anual -->
+        <div class="card-painel dashboard-area p-0 overflow-hidden">
+          <h3 id="dashTituloPivot" class="m-5 text-principal flex items-center gap-2 text-lg border-b pb-2 mb-3">
+            <span class="material-icons text-destaque">calendar_view_month</span> Visão Anual por Categorias
+          </h3>
+          <div class="tabela-container border-none rounded-none shadow-none" id="dashListaPivotAnual">
+            <div class="flex flex-col gap-2 p-3 w-full">
+              <div class="skeleton sk-rect" style="height: 35px;"></div>
+              <div class="skeleton sk-rect" style="height: 35px;"></div>
+              <div class="skeleton sk-rect" style="height: 35px;"></div>
+              <div class="skeleton sk-rect" style="height: 35px;"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==========================================================================
+           TELA 2: LANÇAMENTOS (HISTÓRICO)
+           ========================================================================== -->
+      <section id="screen-lancamentos" class="content-section">
+      
+        <!-- Cabeçalho Lançamentos e Omnibox com Badges Dinâmicos -->
+        <div class="section-header flex-wrap gap-3">
+          
+          <div class="header-lancamentos-wrapper flex-1 flex items-center gap-2 flex-wrap min-w-280">
+            <h2 class="m-0 whitespace-nowrap"><span class="material-icons">swap_horiz</span> Lançamentos</h2>
+  
+            <!-- Agrupador Flex (Alinha no Desktop, Quebra no Mobile) -->
+            <div class="flex items-center gap-2 flex-1 flex-wrap min-w-250">
+              
+              <div class="omnibox-container m-0 flex-1 min-w-150">
+                <span class="material-icons">search</span>
+                <input type="search" id="fBuscaOmni" class="form-control omnibox-input" placeholder="Busca global rápida..." oninput="aplicarFiltros()">
+              </div>
+  
+              <!-- Botão de Totais Dinâmico -->
+              <button id="btnToggleResumo" onclick="toggleResumoFiltros()" class="btn-toggle-resumo flex items-center gap-2 px-3 h-41 rounded-full text-sm font-bold cursor-pointer transition-all whitespace-nowrap shrink-0" title="Valores Totais Filtrados">
+                <span class="material-icons text-lg">calculate</span>
+                <span id="txtBtnResumo" class="texto-oculto-celular">Exibir totais</span>
+              </button>
+              
+              <!-- Container de Resumo Dinâmico -->
+              <div id="resumoFiltrosContainer" class="flex gap-2 items-center flex-wrap hidden">
+                <label class="chk-credito-mobile flex items-center gap-1 text-xs text-suave cursor-pointer mr-1 border-r pr-3 font-bold">
+                  <input type="checkbox" id="chkModoCredito" class="chk-padrao" onchange="alternarModoCredito(this.checked)">
+                  Somar Crédito
+                </label>
+        
+                <div id="badgeTopBal" class="badge-mini badge-receita flex items-center"><span id="lblBalFiltrado">B: +</span> <span id="sumBalFiltrado">R$ 0,00</span></div>
+                <div id="badgeTopDesp" class="badge-mini badge-despesa flex items-center">D: <span id="sumDespFiltrado">R$ 0,00</span></div>
+                <div id="badgeTopRec" class="badge-mini badge-receita flex items-center">R: <span id="sumRecFiltrado">R$ 0,00</span></div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="fab-container">
+            <button id="btnToggleFiltros" class="btn-filtros" title="Filtros Avançados" onclick="abrirJanela('filtrosModal')">
+              <span class="material-icons">filter_list</span>
+            </button>
+            <button id="btnNovoLancamento" class="btn btn-primario btn-cadastro" onclick="abrirModalLancamento()">
+              <span class="material-icons">add</span>
+              <span class="btn-texto">Novo Lançamento</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Ações em Lote -->
+        <div id="barraAcoesLote" class="hidden flex items-center justify-between w-full p-2 mb-3 rounded" style="position: sticky; z-index: 970; background: var(--cor-destaque); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+          <span class="font-bold ml-2"><span id="contadorLote">0</span> selecionado(s)</span>
+          <div class="flex gap-2">
+            <button onclick="alternarSelecaoTodosMobile()" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none; font-weight: bold; padding: 4px 8px;" title="Selecionar Todos"><span class="material-icons text-base">checklist</span></button>
+            <button onclick="confirmarExclusaoLote()" class="btn btn-sm btn-perigo" style="padding: 4px 8px; border: none;" title="Excluir Lote"><span class="material-icons text-base mr-1">delete</span><span class="btn-texto">Excluir</span></button>
+            <button onclick="abrirModalEdicaoLote()" class="btn btn-sm" style="background: white; color: var(--cor-destaque); border: none; font-weight: bold; padding: 4px 8px;" title="Editar Lote"><span class="material-icons text-base mr-1">edit</span><span class="btn-texto">Editar</span></button>
+            <button onclick="cancelarLote()" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 4px 8px;" title="Cancelar"><span class="material-icons text-base">close</span></button>
+          </div>
+        </div>
+
+        <!-- 🌟 GAVETA DE LANÇAMENTOS FUTUROS (Oculta por padrão) -->
+        <details id="containerFuturos" class="cat-group tema-neutro gaveta-futuros hidden">
+          <summary class="cat-summary gaveta-futuros-summary">
+            <div class="gaveta-futuros-titulo">
+              <span class="material-icons" style="color:var(--cor-aviso);">update</span>
+              <span id="txtResumoFuturos">Lançamentos Futuros</span>
+            </div>
+            <div id="txtValoresFuturos" class="valores-futuros-badge"></div>
+          </summary>
+          
+          <div class="cat-content" style="background: var(--bg-principal); padding: 15px;">
+             <!-- Tabela de Futuros (Desktop) -->
+             <div class="tabela-container" id="tabelaFuturosCont">
+               <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="text-center" style="width: 32px;"><input type="checkbox" id="chkSelectAllFuturos" onchange="alternarSelecaoTodos(this.checked, 'futuros')" class="cursor-pointer chk-padrao" title="Selecionar todos os futuros visíveis"></th>
+                      <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('data_compra')">Dt. Com. <span id="seta-futuro-data_compra"></span></th>
+                      <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('data_pag')">Dt. Pag. <span id="seta-futuro-data_pag"></span></th>
+                      <th class="cursor-pointer" style="min-width: 160px;" onclick="mudarOrdenacaoFuturos('descricao')">Descrição <span id="seta-futuro-descricao"></span></th>
+                      <th class="cursor-pointer" style="min-width: 180px;" onclick="mudarOrdenacaoFuturos('observacoes')">Observações <span id="seta-futuro-observacoes"></span></th>
+                      <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('categoria')">Categoria <span id="seta-futuro-categoria"></span></th>
+                      <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('conta')">Conta/Cartão <span id="seta-futuro-conta"></span></th>
+                      <th class="cursor-pointer text-right whitespace-nowrap" onclick="mudarOrdenacaoFuturos('valor')">Valor <span id="seta-futuro-valor"></span></th>
+                      <th class="text-center whitespace-nowrap">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyFuturos"></tbody>
+               </table>
+             </div>
+             
+             <!-- Cards de Futuros (Mobile) -->
+             <div class="cards-container" id="cardsFuturosCont">
+               <div id="divCardsFuturos" style="display:flex; flex-direction:column; gap:12px; width:100%;"></div>
+             </div>
+
+             <!-- Paginação Exclusiva dos Futuros -->
+             <div class="paginacao-container">
+                <div class="paginacao-info-wrapper">
+                  <span id="pInfoFuturos" class="text-sm text-suave font-medium">Mostrando 0-0 de 0</span>
+                </div>
+                <div id="pBotoesFuturos" class="btn-group"></div>
+             </div>
+          </div>
+        </details>
+
+        <!-- Tabela (Desktop) -->
+        <div class="tabela-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 32px;"><input type="checkbox" id="chkSelectAll" onchange="alternarSelecaoTodos(this.checked, 'principal')" class="cursor-pointer chk-padrao" title="Selecionar todos da página atual"></th>
+                <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('data_compra')">Dt. Com. <span id="seta-data_compra"></span></th>
+                <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('data_pag')">Dt. Pag. <span id="seta-data_pag"></span></th>
+                <th class="cursor-pointer" style="min-width: 160px;" onclick="mudarOrdenacao('descricao')">Descrição <span id="seta-descricao"></span></th>
+                <th class="cursor-pointer" style="min-width: 180px;" onclick="mudarOrdenacao('observacoes')">Observações <span id="seta-observacoes"></span></th>
+                <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('categoria')">Categoria <span id="seta-categoria"></span></th>
+                <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('conta')">Conta/Cartão <span id="seta-conta"></span></th>
+                <th class="cursor-pointer text-right whitespace-nowrap" onclick="mudarOrdenacao('valor')">Valor <span id="seta-valor"></span></th>
+                <th class="text-center whitespace-nowrap">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyLancamentos">
+              <tr>
+                <td colspan="10" class="p-0">
+                  <div class="flex flex-col gap-2 p-3">
+                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cards (Mobile) -->
+        <div class="cards-container" id="divCardsLancamentos">
+          <div class="flex flex-col gap-3 w-full p-2">
+            <div class="skeleton sk-rect" style="height: 110px;"></div>
+            <div class="skeleton sk-rect" style="height: 110px;"></div>
+            <div class="skeleton sk-rect" style="height: 110px;"></div>
+          </div>
+        </div>
+
+        <!-- Paginação -->
+        <div class="paginacao-container">
+          <div class="paginacao-info-wrapper">
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-suave">Itens por página:</label>
+              <select id="pLimite" class="form-control w-auto py-1 px-2 text-sm font-bold" onchange="mudarLimitePagina(this.value)">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <span id="pInfo" class="text-sm text-suave font-medium ml-2">0-0 de 0</span>
+          </div>
+          <div id="pBotoes" class="btn-group"></div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           TELA 3: CONFIGURAÇÕES E SISTEMA
+           ========================================================================== -->
+      <section id="screen-config" class="content-section">
+        
+        <div class="section-header">
+          <h2><span class="material-icons">settings</span> Configurações</h2>
+        </div>
+
+        <!-- Menu de Abas Internas -->
+        <div class="sub-tabs-container">
+          <button class="sub-tab-btn active" onclick="alternarSubAba('sistema')"><span class="material-icons">dns</span> Sistema</button>
+          <button class="sub-tab-btn" onclick="alternarSubAba('personalizacao')"><span class="material-icons">palette</span> Aparência</button>
+          <button class="sub-tab-btn" onclick="alternarSubAba('importacao')"><span class="material-icons">cloud_upload</span> Importar / Limpar</button>
+          <button class="sub-tab-btn" onclick="alternarSubAba('auditoria')"><span class="material-icons" style="font-size: 1.15rem;">security</span> Auditoria</button>
+        </div>
+
+        <!-- 3.1 Aba Sistema -->
+        <div id="subPanelSistema" class="sub-tab-panel active">
+          
+          <!-- Card de Conexão com o Servidor (Largura Total) -->
+          <div class="card-painel mb-5 border-t-4 border-perigo shadow-inner">
+            <h3 class="m-0 mb-3 text-principal border-b pb-2 flex items-center gap-2 text-lg">
+              <span class="material-icons text-perigo">admin_panel_settings</span> Conexão com Banco de Dados
+            </h3>
+
+            <div class="grid-conexao-api">
+              <!-- Linha 1: Botão de Desconectar (Esq) / Espaço Vazio (Dir) -->
+              <div id="boxDesconectarApp" class="form-group m-0 hidden">
+                <div class="flex gap-2 w-full items-center">
+                  <p class="text-sm text-suave m-0 flex-1">Gerencie o link do servidor e a chave de segurança criptografada da sua planilha.</p>
+                  <button onclick="desconectarApp()" class="btn btn-perigo flex items-center justify-center gap-2 h-41">
+                    <span class="material-icons">power_settings_new</span> <span class="font-bold texto-oculto-celular">Desconectar</span>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group m-0 espacador-grid-api"></div>
+
+              <!-- Linha 2: URL (Esq) / Token + Botão de Validar (Dir) -->
+              <div id="grupoConfigUrl" class="form-group m-0">
+                <label>URL do Web App (Google)</label>
+                <input type="url" id="inpConfigApiUrl" class="form-control font-mono text-xs h-11" placeholder="https://script.google.com/macros/s/.../exec">
+              </div>
+
+              <div class="form-group m-0">
+                <label>Token Secreto (Senha da Planilha)</label>
+                <div class="flex gap-2 w-full">
+                  <input type="password" id="inpConfigApiToken" class="form-control flex-1 h-11" placeholder="Senha atual">
+                  <button id="btnSalvarCredenciais" onclick="salvarConfiguracoesConexao()" class="btn btn-perigo h-41 px-4 flex items-center justify-center gap-2 shrink-0" title="Validar Credenciais">
+                    <span class="material-icons text-base">security</span> <span class="texto-oculto-celular">Validar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grade Inferior: Contas, Categorias e Modelos -->
+          <div class="grid grid-auto-fit gap-5">
+            
+            <div class="card-painel">
+              <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <h3 class="m-0 text-principal flex items-center gap-2 text-lg">
+                  <span class="material-icons text-destaque">credit_card</span> Contas e Cartões
+                </h3>
+                <button onclick="abrirModalConta()" class="btn btn-primario btn-cadastro">
+                  <span class="material-icons">add</span><span class="btn-texto">Nova Conta</span>
+                </button>
+              </div>
+              <div class="mb-3">
+                <input type="search" id="inpBuscaConfigConta" class="form-control" placeholder="🔍 Pesquisar por nome ou tipo..." oninput="renderizarConfigContas()">
+              </div>
+              <div id="listaConfigContas" class="list-container">
+                <div class="flex flex-col gap-3 w-full">
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-painel">
+              <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <h3 class="m-0 text-principal flex items-center gap-2 text-lg">
+                  <span class="material-icons text-aviso">local_offer</span> Categorias
+                </h3>
+                <button onclick="abrirModalCategoria()" class="btn btn-aviso btn-cadastro">
+                  <span class="material-icons">add</span><span class="btn-texto">Nova Categoria</span>
+                </button>
+              </div>
+              <div class="mb-3">
+                <input type="search" id="inpBuscaConfigCategoria" class="form-control" placeholder="🔍 Pesquisar por nome ou grupo..." oninput="renderizarConfigCategorias()">
+              </div>
+              <div id="listaConfigCategorias" class="list-container">
+                <div class="flex flex-col gap-3 w-full">
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-painel">
+              <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <h3 class="m-0 text-principal flex items-center gap-2 text-lg">
+                  <span class="material-icons text-sucesso">auto_awesome</span> Modelos Rápidos
+                </h3>
+                <button onclick="abrirModalModelo()" class="btn btn-sucesso btn-cadastro">
+                  <span class="material-icons">add</span><span class="btn-texto">Novo Modelo</span>
+                </button>
+              </div>
+              <div class="mb-3">
+                <input type="search" id="inpBuscaConfigModelo" class="form-control" placeholder="🔍 Pesquisar por nome ou tipo..." oninput="renderizarConfigModelos()">
+              </div>
+              <div id="listaConfigModelos" class="list-container">
+                <div class="flex flex-col gap-3 w-full">
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3.2 Aba Aparência -->
+        <div id="subPanelPersonalizacao" class="sub-tab-panel">
+          <div class="card-painel max-w-lg">
+            <h3 class="m-0 mb-5 text-principal border-b pb-2 flex items-center gap-2">
+              <span class="material-icons text-destaque">palette</span> Aparência do Aplicativo
+            </h3>
+
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <strong class="block text-base">Modo Escuro</strong>
+                <span class="text-sm text-suave">Reduz o cansaço visual em ambientes escuros.</span>
+              </div>
+              <label class="switch-tema">
+                <input type="checkbox" id="chkModoEscuro">
+                <span class="slider-tema"></span>
+              </label>
+            </div>
+
+            <!-- Divisão da Cor de Destaque -->
+            <div class="mb-6 border-t-dashed pt-5">
+              <strong class="block text-base mb-1">Cor de Destaque</strong>
+              <span class="text-sm text-suave block mb-3">Escolha a paleta de cores principal do sistema.</span>
+              <div class="flex gap-3">
+                <button data-cor="azul" onclick="mudarPaletaCor('azul')" class="palette-btn" style="background-color: #3498db;" title="Azul Padrão"></button>
+                <button data-cor="esmeralda" onclick="mudarPaletaCor('esmeralda')" class="palette-btn" style="background-color: #27ae60;" title="Verde Esmeralda"></button>
+                <button data-cor="ametista" onclick="mudarPaletaCor('ametista')" class="palette-btn" style="background-color: #9b59b6;" title="Roxo Ametista"></button>
+                <button data-cor="outono" onclick="mudarPaletaCor('outono')" class="palette-btn" style="background-color: #e67e22;" title="Laranja Outono"></button>
+                <button data-cor="rubi" onclick="mudarPaletaCor('rubi')" class="palette-btn" style="background-color: #e74c3c;" title="Vermelho Rubi"></button>
+              </div>
+            </div>
+
+            <!-- Divisão do Tamanho dos Textos -->
+            <div class="mb-3 border-t-dashed pt-5">
+              <strong class="block text-base mb-1">Tamanho dos Textos</strong>
+              <span class="text-sm text-suave block mb-3">Ajuste o tamanho das fontes nas tabelas.</span>
+              <div class="flex gap-2">
+                <button id="btnFontePadrao" onclick="ajustarTamanhoFonte('compacto')" class="btn btn-primario">Padrão</button>
+                <button id="btnFonteAmpliada" onclick="ajustarTamanhoFonte('confortavel')" class="btn btn-secundario">Ampliado</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3.3 Aba Importação -->
+        <div id="subPanelImportacao" class="sub-tab-panel">
+          <div class="grid grid-cols-4 gap-5">
+            
+            <div class="card-painel flex-2 grid-span-3">
+              <h3 class="m-0 mb-3 text-principal border-b pb-2 text-lg flex items-center gap-2">
+                <span class="material-icons text-destaque">content_paste</span> Importador de Dados
+              </h3>
+              <p class="text-sm text-suave mb-3">
+                Cole abaixo as linhas geradas pelo assistente. Certifique-se de que a ordem seja:<br>
+                <code>Data_Compra; Data_Pag; Descricao; Observacoes; Categoria; Conta; No_Credito; Valor; Pago</code>
+              </p>
+              
+              <div class="form-group">
+                <textarea id="txtAreaImportacao" class="form-control font-mono text-sm resize-y" rows="10" placeholder="Exemplo:&#10;22/06/2026;17/07/2026;Mercado Central;Compras do mês;Alimentação;Nubank;TRUE;-150.84;TRUE"></textarea>
+              </div>
+              <div class="flex justify-end mt-2">
+                <button onclick="processarImportacaoTextoLote()" class="btn btn-primario"><span class="material-icons">save_alt</span> Processar e Importar</button>
+              </div>
+            </div>
+
+            <div class="card-painel border-t-4 border-perigo">
+              <h3 class="m-0 mb-3 text-perigo text-lg border-b pb-2 flex items-center gap-2">
+                <span class="material-icons">gavel</span> Área de Redefinição
+              </h3>
+              <p class="text-sm text-suave leading-relaxed">
+                Use este botão para apagar todos os lançamentos ativos e limpar os registros de teste.
+              </p>
+              <div class="mt-5">
+                <button onclick="confirmarLimpezaTotalBanco()" class="btn btn-perigo w-full"><span class="material-icons">delete_forever</span> Apagar Todos os Lançamentos</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.4 Aba Auditoria -->
+        <div id="subPanelAuditoria" class="sub-tab-panel">
+          <div id="auditoriaVazia" class="hidden text-center p-5 bg-card rounded border border-dashed mt-2">
+            <span class="material-icons text-sucesso mb-3 text-5xl">verified_user</span>
+            <h3 class="m-0 mb-2 text-principal text-lg">Base de Dados Íntegra!</h3>
+            <p class="text-suave text-sm m-0 mx-auto max-w-md">
+              Não encontramos nenhuma conta ou categoria desconhecida nos seus lançamentos. Tudo está perfeitamente alinhado.
+            </p>
+          </div>
+
+          <div id="gridAuditoria" class="grid grid-auto-fit gap-5">
+            <div class="card-painel">
+              <h3 class="m-0 mb-3 text-principal flex items-center gap-2 text-lg border-b pb-2">
+                <span class="material-icons text-destaque">credit_card</span> Contas Não Registradas
+              </h3>
+              <div id="listaContasInconsistentes" class="list-container"></div>
+            </div>
+            <div class="card-painel">
+              <h3 class="m-0 mb-3 text-principal flex items-center gap-2 text-lg border-b pb-2">
+                <span class="material-icons text-aviso">local_offer</span> Categorias Não Registradas
+              </h3>
+              <div id="listaCategoriasInconsistentes" class="list-container"></div>
+            </div>
+          </div>
+        </div>
+        
+      </section>
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       MODAIS E OVERLAYS
+       ========================================================================== -->
+  <div id="modalBackdrop" class="modal-backdrop hidden"></div>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Modal: Filtros Avançados -->
+  <div id="filtrosModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3><span class="material-icons text-destaque">filter_list</span> Filtros Avançados</h3>
+      <button type="button" class="modal-close" onclick="fecharJanela('filtrosModal')">&times;</button>
+    </div>
+    
+    <div class="modal-body p-3">
+      <!-- O Form agora fica apenas dentro do body para não quebrar a rolagem -->
+      <form id="formFiltros" class="m-0 p-0" onsubmit="event.preventDefault(); aplicarFiltros(); fecharJanela('filtrosModal');">
+        
+        <!-- Bloco 1: Base e Ordenação (Oculto no Desktop) -->
+        <div class="form-row mb-2">
+          <div class="form-group flex-1 m-0">
+            <label>Base</label>
+            <select id="fTipoData" class="form-control font-bold" onchange="alternarBaseTemporal()">
+              <option value="data_compra" selected>Compra</option>
+              <option value="data_pag">Pagto.</option>
+            </select>
+          </div>
+          <div class="form-group flex-1 m-0 mobile-only-flex flex-col">
+            <label>Ordenar Por (Celular)</label>
+            <select id="fOrdenacaoMobile" class="form-control font-bold" onchange="ordenarPeloCelular(this.value)">
+              <option value="data_compra_desc">Dt. Compra ⬇️</option>
+              <option value="data_compra_asc">Dt. Compra ⬆️</option>
+              <option value="valor_desc">Valor ⬇️</option>
+              <option value="valor_asc">Valor ⬆️</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bloco 2: Tipo e Forma de Pgto -->
+        <div class="form-row mb-2">
+          <div class="form-group flex-1 m-0">
+            <label>Tipo</label>
+            <select id="fTipoFluxo" class="form-control" onchange="aplicarFiltros()">
+              <option value="">Todos</option>
+              <option value="RECEITA">Receitas</option>
+              <option value="DESPESA">Despesas</option>
+            </select>
+          </div>
+          <div class="form-group flex-1 m-0">
+            <label>Forma de Pgto.</label>
+            <select id="fCredito" class="form-control" onchange="aplicarFiltros()">
+              <option value="">Todas</option>
+              <option value="SIM">Crédito</option>
+              <option value="NAO">Não é crédito</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bloco 3: De / Até -->
+        <div class="form-row mb-3">
+          <div class="form-group flex-1 m-0">
+            <label>De (Início)</label>
+            <input type="date" id="fDataInicio" class="form-control" onchange="aplicarFiltros()">
+          </div>
+          <div class="form-group flex-1 m-0">
+            <label>Até (Fim)</label>
+            <input type="date" id="fDataFim" class="form-control" onchange="aplicarFiltros()">
+          </div>
+        </div>
+
+        <!-- Bloco 4: Caixa Interna (Mês, Categoria, Conta) -->
+        <div class="caixa-interna flex-col items-start p-3 mb-3 border-dashed">
+          <div class="form-group w-full m-0 mb-2"><label>Mês de Referência</label><div id="tag-fMes"></div></div>
+          <div class="form-group w-full m-0 mb-2"><label>Categoria</label><div id="tag-fCategoria"></div></div>
+          <div class="form-group w-full m-0"><label>Conta / Cartão</label><div id="tag-fConta"></div></div>
+        </div>
+
+        <!-- Bloco 5: Barras de Ponta a Ponta (Descrição e Obs) -->
+        <div class="flex-col gap-2 mb-2">
+          <div class="form-group m-0 w-full">
+            <label>Descrição</label>
+            <input type="search" id="fDescricao" class="form-control" placeholder="Contém texto..." oninput="aplicarFiltros()">
+          </div>
+          <div class="form-group m-0 w-full mt-2">
+            <label>Observações</label>
+            <input type="search" id="fObservacoes" class="form-control" placeholder="Contém texto..." oninput="aplicarFiltros()">
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer FORA do form para garantir que ele fique grudado no fundo -->
+    <div class="modal-footer grid grid-cols-2 gap-3 p-3">
+      <button type="button" class="btn btn-secundario flex items-center justify-center gap-1 p-2" onclick="resetarFiltrosGerais();" title="Limpar Tudo e Redefinir">
+        <span class="material-icons text-sm">delete_sweep</span> Redefinir
+      </button>
+      
+      <!-- A MÁGICA: O atributo "form" liga o botão ao form lá em cima -->
+      <button type="submit" form="formFiltros" class="btn btn-primario flex items-center justify-center p-2">
+        Aplicar
+      </button>
+    </div>
+  </div>
+  
+  <!-- Modal: Novo Lançamento -->
+  <div id="lancamentoModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-destaque">
+        <span id="iconeModalLancamento" class="material-icons">add_circle</span> 
+        <span id="tituloModalLancamento" class="text-principal">Novo Lançamento</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharModalLancamento()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="formLancamento" class="modal-form p-0 overflow-visible" onsubmit="processarEnvioLancamento(event)">
+        <input type="hidden" id="inpIdLancamento" value="">
+
+        <!-- Seleção de Modelo -->
+        <div class="caixa-destaque">
+          <label class="text-destaque font-bold flex items-center gap-1 shrink-0 m-0 text-sm">
+            <span class="material-icons text-base">auto_awesome</span> Usar Modelo
+          </label>
+          <select id="selModelosRacionados" class="form-control font-medium border-destaque p-1 text-sm m-0 truncate flex-1" onchange="aplicarModeloLancamento(this.value)">
+            <option value="">Manual</option>
+          </select>
+        </div>
+        
+        <!-- Botões Radiais Inteligentes -->
+        <div class="grid-botoes">
+          <label class="radio-segment radio-receita">
+            <input type="radio" name="tipo_fluxo" value="RECEITA" class="hidden" onchange="verificarExibicaoCredito('radio')"> Receita
+          </label>
+          <label class="radio-segment radio-despesa">
+            <input type="radio" name="tipo_fluxo" value="DESPESA" checked class="hidden" onchange="verificarExibicaoCredito('radio')"> Despesa
+          </label>
+          <label id="labelTransferencia" class="radio-segment radio-transf">
+            <input type="radio" name="tipo_fluxo" value="TRANSFERENCIA" class="hidden" onchange="verificarExibicaoCredito('radio')"> Transf.
+          </label>
+        </div>
+
+        <!-- Descrição -->
+        <div class="form-group"><label>Descrição</label><input type="text" id="inpDescricao" class="form-control" required></div>
+
+        <!-- Valor e Status Pago -->
+        <div class="form-row mb-2">
+          <div class="form-group flex-1">
+            <label>Valor (R$)</label>
+            <input type="text" id="inpValor" class="form-control font-bold" required placeholder="R$ 0,00" oninput="formatarMoedaInput(this)">
+          </div>
+          
+          <div class="form-group shrink-0">
+            <label>Status</label>
+            <label class="status-btn flex items-center justify-center gap-1 rounded border cursor-pointer h-41 select-none font-bold m-0 transition-all">
+                <input type="checkbox" id="inpPago" class="hidden">
+                <span class="material-icons text-base icon-unchecked">schedule</span>
+                <span class="material-icons text-base icon-checked hidden">check_circle</span>
+                <span>Pago?</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Campos Padrão (Categoria / Conta / Crédito) -->
+        <div id="grupoCamposPadrao">
+          <div class="form-row mb-2">
+            <div class="form-group"><label>Categoria</label><select id="selCategoria" class="form-control truncate" required onchange="verificarExibicaoCredito('categoria')"><option value="">Selecione...</option></select></div>
+            <div class="form-group"><label>Conta/Cartão</label><select id="selConta" class="form-control truncate" required onchange="calcularDataPagamentoAutomatica()"><option value="">Selecione...</option></select></div>
+          </div>
+          
+          <div class="caixa-interna" id="groupNoCredito">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="inpNoCredito" class="cursor-pointer m-0 w-5 h-5" onchange="calcularDataPagamentoAutomatica(); const dp = document.getElementById('divParcelas'); (this.checked && !document.getElementById('inpIdLancamento').value) ? dp.classList.remove('hidden') : dp.classList.add('hidden');">
+              <label for="inpNoCredito" class="cursor-pointer m-0 select-none font-bold">Compra no Crédito?</label>
+            </div>
+            
+            <div id="divParcelas" class="hidden flex items-center gap-2 bg-card p-1 rounded border shrink-0">
+              <label class="m-0 text-xs font-bold text-destaque">Parcelas:</label>
+              <input type="number" id="inpParcelas" class="form-control text-center font-bold border-destaque p-0 w-12" min="1" max="120" value="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos Transferência -->
+        <div id="grupoCamposTransferencia" class="hidden caixa-interna border-dashed flex-col items-start p-3">
+          <div class="form-row m-2 w-full">
+            <div class="form-group flex-1"><label>Origem (Saiu de)</label><select id="selContaOrigem" class="form-control truncate" onchange="atualizarObsTransferencia()"><option value="">Selecione...</option></select></div>
+            <div class="form-group flex-1"><label>Destino (Entrou em)</label><select id="selContaDestino" class="form-control truncate" onchange="atualizarObsTransferencia()"><option value="">Selecione...</option></select></div>
+          </div>
+        </div>
+
+        <!-- Datas -->
+        <div class="form-row mb-2">
+          <div class="form-group"><label>Data da Compra</label><input type="date" id="inpDataCompra" class="form-control" required onchange="calcularDataPagamentoAutomatica()"></div>
+          <div class="form-group"><label>Data do Pagamento</label><input type="date" id="inpDataPag" class="form-control" required onchange="calcularDataPagamentoAutomatica('data_pag')"></div>
+        </div>
+
+        <div class="form-group mb-0"><label>Observações</label><textarea id="txtObservacoes" class="form-control resize-none" rows="2"></textarea></div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharModalLancamento()">Cancelar</button>
+      <button type="submit" form="formLancamento" class="btn btn-primario">Salvar Registro</button>
+    </div>
+  </div>
+
+  <!-- Modal: Edição em Lote -->
+  <div id="loteModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-destaque">
+        <span class="material-icons">edit_note</span>
+        <span class="text-principal">Editar Lançamentos em Lote</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharModalLote()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="formLote" class="modal-form p-0 overflow-visible" onsubmit="processarEdicaoLote(event)">
+        <p class="text-sm text-suave m-0 mb-3">Escolha apenas os campos que deseja alterar nos lançamentos selecionados. Deixe em branco o que quiser manter original.</p>
+        
+        <div class="form-group"><label>Nova Descrição</label><input type="text" id="inpLoteDescricao" class="form-control" placeholder="Deixe em branco para não alterar"></div>
+        
+        <div class="form-row">
+          <div class="form-group"><label>Nova Categoria</label><select id="selLoteCategoria" class="form-control"></select></div>
+          <div class="form-group"><label>Nova Conta / Cartão</label><select id="selLoteConta" class="form-control"></select></div>
+          <div class="form-group flex-1 min-w-150">
+            <label>É Crédito?</label>
+            <select id="selLoteCredito" class="form-control">
+              <option value="">-- Manter --</option>
+              <option value="SIM">Sim</option>
+              <option value="NAO">Não</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group"><label>Nova Data da Compra</label><input type="date" id="inpLoteDataCompra" class="form-control"></div>
+          <div class="form-group"><label>Nova Data de Pagamento</label><input type="date" id="inpLoteDataPag" class="form-control"></div>
+          <div class="form-group flex-1 min-w-150">
+            <label>Status</label>
+            <select id="selLotePago" class="form-control">
+              <option value="">-- Manter --</option>
+              <option value="SIM">Sim (Pago)</option>
+              <option value="NAO">Não (Pendente)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group mb-0"><label>Novas Observações</label><textarea id="txtLoteObservacoes" class="form-control resize-none" rows="2" placeholder="Deixe em branco para não alterar"></textarea></div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharModalLote()">Cancelar</button>
+      <button type="submit" form="formLote" class="btn btn-primario" id="btnSalvarLote">Aplicar Alterações</button>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Conta -->
+  <div id="contaModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-destaque">
+        <span id="iconeModalConta" class="material-icons">credit_card</span> 
+        <span id="tituloModalConta" class="text-principal">Nova Conta / Cartão</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharModalConta()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="formConta" class="modal-form p-0 overflow-visible" onsubmit="processarEnvioConta(event)">
+        <input type="hidden" id="inpIdContaAntigo" value="">
+        <div class="form-group"><label>Nome da Conta / Cartão</label><input type="text" id="inpNomeConta" class="form-control" required placeholder="Ex: Nubank, Banco do Brasil"></div>
+        
+        <div class="form-group mb-1">
+          <label>Tipo(s) de Conta</label>
+          <div id="tag-mTipoConta"></div>
+        </div>
+        
+        <div class="text-xs text-suave bg-principal p-2 rounded border border-dashed mb-3 flex items-start gap-2">
+          <span class="material-icons text-destaque" style="font-size: 1rem;">info</span>
+          <span><strong>Atenção:</strong> A <strong>primeira tag</strong> define onde o saldo aparecerá no Dashboard. A tag "Crédito" habilita o controle de faturas.</span>
+        </div>
+
+        <div id="grupoCamposCredito" class="hidden flex-col gap-0">
+          <div class="form-row mb-2">
+            <div class="form-group m-0"><label>Dia Fechamento</label><input type="number" id="inpFechamentoConta" class="form-control" min="1" max="31" placeholder="Dia"></div>
+            <div class="form-group m-0"><label>Dia Vencimento</label><input type="number" id="inpVencimentoConta" class="form-control" min="1" max="31" placeholder="Dia"></div>
+          </div>
+          <div class="form-group mb-0"><label>Limite Total</label><input type="text" id="inpLimiteConta" class="form-control font-bold" placeholder="R$ 5.000,00" oninput="formatarMoedaInput(this)"></div>
+        </div>
+        
+        <div class="form-group mt-3 mb-0">
+          <label>Cor Identificadora</label>
+          <div class="flex items-center gap-2">
+            <input type="color" id="inpCorConta" value="#3498db" class="bg-card cursor-pointer rounded border p-1 w-12 h-11">
+            <span class="text-sm text-suave">Cor para tabelas e gráficos</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharModalConta()">Cancelar</button>
+      <button type="submit" form="formConta" class="btn btn-primario">Salvar Conta</button>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Categoria -->
+  <div id="categoriaModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-aviso">
+        <span id="iconeModalCategoria" class="material-icons">local_offer</span> 
+        <span id="tituloModalCategoria" class="text-principal">Nova Categoria</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharModalCategoria()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="formCategoria" class="modal-form p-0 overflow-visible" onsubmit="processarEnvioCategoria(event)">
+        <input type="hidden" id="inpIdCategoriaAntigo" value="">
+        <div class="form-group"><label>Nome da Categoria</label><input type="text" id="inpNomeCategoria" class="form-control" required placeholder="Ex: Supermercado, Salário"></div>
+        
+        <div class="form-group">
+          <label>Grupo Financeiro</label>
+          <select id="selTipoCategoria" class="form-control" required>
+            <option value="">Selecione...</option>
+            <option value="Despesas Essenciais">Despesas Essenciais</option>
+            <option value="Despesas Não Essenciais">Despesas Não Essenciais</option>
+            <option value="Retorno Investimentos">Retorno Investimentos</option>
+            <option value="Montante Investido">Montante Investido</option>
+            <option value="Receitas">Receitas</option>
+            <option value="Transferências Pessoais">Transferências Pessoais</option>
+          </select>
+        </div>
+        
+        <div class="form-row mb-2">
+            <div class="form-group flex-1 m-0">
+                <label>Ícone Visual</label>
+                <div class="flex items-center gap-3">
+                    <div id="previewIconeCat" class="w-11 h-11 flex items-center justify-center bg-principal border rounded text-2xl text-suave transition-all material-icons">local_offer</div>
+                    <button type="button" class="btn btn-secundario text-sm py-2 px-3" onclick="alternarSeletorIcones()">Escolher Ícone</button>
+                </div>
+                <input type="hidden" id="inpIconeCategoria" value="local_offer">
+                
+                <!-- Biblioteca Curada usando as novas utilitárias -->
+                <div id="gridSeletorIcones" class="hidden grid grid-cols-autofit-sm gap-2 mt-3 max-h-160 p-2 bg-principal border rounded shadow-inner scroll-y-elegante"></div>
+            </div>
+        </div>
+
+        <div class="form-group mb-0"><label>Descrição / Lembrete</label><input type="text" id="inpDescricaoCategoria" class="form-control" placeholder="Ex: Gastos com supermercado e feira"></div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharModalCategoria()">Cancelar</button>
+      <button type="submit" form="formCategoria" class="btn btn-aviso">Salvar Categoria</button>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmação Perigosa -->
+  <div id="confirmModal" class="modal-box modal-confirma-box hidden">
+    <div class="modal-header" style="background: var(--bg-perigo);"><h3 style="color: var(--cor-perigo);"><span class="material-icons">report_problem</span> Atenção</h3></div>
+    <div id="confirmModalBody" class="modal-body" style="font-size: 1rem; line-height: 1.5;"></div>
+    <div class="modal-footer">
+      <button id="btnConfirmCancelar" class="btn btn-secundario">Cancelar</button>
+      <button id="btnConfirmSim" class="btn btn-perigo">Confirmar Exclusão</button>
+    </div>
+  </div>
+
+  <!-- Modal: Novo Modelo Rápido -->
+  <div id="modeloModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-sucesso">
+        <span id="iconeModalModelo" class="material-icons">auto_awesome</span> 
+        <span id="tituloModalModelo" class="text-principal">Criar Modelo Rápido</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharModalModelo()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="formModelo" class="modal-form p-0 overflow-visible" onsubmit="processarEnvioModelo(event)">
+        <input type="hidden" id="inpIdModeloAntigo" value="">
+        <p class="text-sm text-suave m-0 mb-3">Preencha os dados que você deseja deixar "salvos" neste modelo. O que você deixar em branco, terá que ser preenchido manualmente na hora de lançar.</p>
+        
+        <div class="form-group"><label>Nome do Modelo (Para identificar)</label><input type="text" id="inpNomeModelo" class="form-control" required placeholder="Ex: Conta de Luz Base, Salário"></div>
+        
+        <div class="form-group">
+          <label>Tipo (Receita / Despesa / Transf.)</label>
+          <select id="selTipoModelo" class="form-control" required onchange="alternarCamposModelo()">
+            <option value="DESPESA">Despesa</option>
+            <option value="RECEITA">Receita</option>
+            <option value="TRANSFERENCIA">Transferência</option>
+          </select>
+        </div>
+        
+        <div class="form-group"><label>Descrição Padrão</label><input type="text" id="inpDescricaoModelo" class="form-control" placeholder="Deixe em branco se for preencher na hora"></div>
+        <div class="form-group"><label>Observações Padrão</label><textarea id="txtObservacoesModelo" class="form-control resize-none" rows="2" placeholder="Deixe em branco se for preencher na hora"></textarea></div>
+
+        <div class="form-row mb-2">
+          <div class="form-group flex-1 m-0"><label>Valor Padrão (R$)</label><input type="text" id="inpValorModelo" class="form-control" placeholder="Opcional" oninput="formatarMoedaInput(this)"></div>
+          <div class="form-group flex-1 min-w-150 m-0" id="grupoCreditoModelo"><label>É Crédito?</label><select id="selCreditoModelo" class="form-control"><option value="NAO">Não</option><option value="SIM">Sim</option></select></div>
+        </div>
+
+        <!-- Campos para Receita / Despesa -->
+        <div class="form-row mb-0" id="grupoContaCategoriaModelo">
+          <div class="form-group flex-1 m-0"><label>Categoria Padrão</label><select id="selCategoriaModelo" class="form-control"></select></div>
+          <div class="form-group flex-1 m-0"><label>Conta Padrão</label><select id="selContaModelo" class="form-control"></select></div>
+        </div>
+
+        <!-- Campos para Transferência -->
+        <div class="form-row hidden bg-principal p-3 rounded border border-dashed mt-2 mb-0 w-full" id="grupoContaTransferenciaModelo">
+          <div class="form-group flex-1 m-0"><label>Origem Padrão (Saiu de)</label><select id="selOrigemModelo" class="form-control"></select></div>
+          <div class="form-group flex-1 m-0"><label>Destino Padrão (Entrou em)</label><select id="selDestinoModelo" class="form-control"></select></div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharModalModelo()">Cancelar</button>
+      <button type="submit" form="formModelo" class="btn btn-sucesso">Salvar Modelo</button>
+    </div>
+  </div>
+
+  <!-- Injeção do Módulo de Lógica JavaScript -->
+  <script src="script.js" defer></script>
+</body>
+</html>

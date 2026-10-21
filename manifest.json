@@ -1,0 +1,17 @@
+{
+  "name": "Meu Controle Financeiro",
+  "short_name": "Financeiro",
+  "description": "Sistema de gestão financeira pessoal e controle de caixa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f7",
+  "theme_color": "#2c3e50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1825/1825632.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
