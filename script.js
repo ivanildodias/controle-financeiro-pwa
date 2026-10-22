@@ -80,6 +80,15 @@
   // ==========================================================================
   document.addEventListener('DOMContentLoaded', function() {
     
+    // REGISTRO DO SERVICE WORKER (PWA OFFLINE)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker ativado! Escopo:', reg.scope))
+          .catch(err => console.error('Falha ao registrar Service Worker:', err));
+      });
+    }
+    
     configurarGerenciadorTema();
     const fonteSalva = localStorage.getItem('finance-font-size');
     if (fonteSalva) ajustarTamanhoFonte(fonteSalva, false); 
