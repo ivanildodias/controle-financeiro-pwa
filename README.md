@@ -1,9 +1,14 @@
 # 💰 ID Finanças — Meu Controle Financeiro (PWA)
 
+[![Acesse Online na Vercel](https://img.shields.io/badge/Acessar_App-idfinancas.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://idfinancas.vercel.app/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-3498db?style=for-the-badge&logo=pwa)](https://developer.mozilla.org/pt-BR/docs/Web/Progressive_web_apps)
 [![Vanilla JS](https://img.shields.io/badge/Vanilla_JS-ES6+-f7df1e?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
 [![Backend](https://img.shields.io/badge/Backend-Google_Apps_Script-34a853?style=for-the-badge&logo=googlesheets&logoColor=white)](https://developers.google.com/apps-script)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-ivanildodias%2Fcontrole--financeiro--pwa-181717?style=for-the-badge&logo=github)](https://github.com/ivanildodias/controle-financeiro-pwa)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#licença)
+
+> 🚀 **App Oficial Online:** [https://idfinancas.vercel.app/](https://idfinancas.vercel.app/)  
+> 📦 **Repositório GitHub:** [https://github.com/ivanildodias/controle-financeiro-pwa](https://github.com/ivanildodias/controle-financeiro-pwa)
 
 Um **Progressive Web App (PWA)** moderno, leve e completo para **gestão financeira pessoal e controle de fluxo de caixa**, projetado com foco em usabilidade móvel (*mobile-first*), alta performance e **zero dependências externas**.
 
@@ -141,58 +146,61 @@ controle-financeiro-pwa/
 
 ---
 
-## 🚀 Como Configurar e Executar
+## 🚀 Como Começar a Usar
 
-### Pré-requisitos
-* Um navegador moderno (Chrome, Edge, Safari, Firefox).
-* Uma conta Google para hospedar a planilha e o Google Apps Script.
-* Um servidor web local simples (ex: extensão **Live Server** do VS Code, Python HTTP server, ou hospedagem estática como Vercel/GitHub Pages).
+Você **não precisa instalar nada no seu computador** para começar a usar o ID Finanças! O frontend já está publicado e pronto para uso na Vercel: **[https://idfinancas.vercel.app/](https://idfinancas.vercel.app/)**.
 
-### 1. Executando o Frontend Localmente
-Como o projeto utiliza tecnologias PWA (Service Workers), ele requer um protocolo `http://` ou `https://` para registro correto do cache.
+Basta configurar o seu próprio banco de dados no Google Sheets seguindo os passos abaixo:
 
-**Opção A — Usando VS Code (Recomendado):**
-1. Instale a extensão **Live Server** no VS Code.
-2. Clique com o botão direito no `index.html` e selecione **"Open with Live Server"** (ou clique em *"Go Live"* no rodapé).
-3. O app abrirá em `http://127.0.0.1:5500`.
-
-**Opção B — Usando Python:**
-```bash
-# Python 3
-python3 -m http.server 8080
-```
-Acesse `http://localhost:8080`.
-
-### 2. Configurando o Backend (Google Apps Script)
+### Passo 1: Configurar a Planilha e o Backend (Google Apps Script)
 1. Crie uma nova planilha em branco no [Google Sheets](https://sheets.new).
-2. Acesse o menu **Extensões** ➔ **Apps Script**.
-3. Apague o código inicial que estiver lá e cole todo o conteúdo do arquivo [`backend/codigo.gs`](backend/codigo.gs).
+2. Na planilha, acesse o menu superior **Extensões** ➔ **Apps Script**.
+3. Apague qualquer código existente no editor e cole todo o conteúdo do arquivo [`backend/codigo.gs`](backend/codigo.gs).
 4. **Gerando a Estrutura da Planilha Automaticamente**:
    * No menu superior do Apps Script, selecione a função **`inicializarBancoDeDados`** no seletor de funções e clique em **Executar**.
-   * O Google solicitará autorização na primeira execução (clique em *Avançado* ➔ *Acessar projeto (não seguro)* para autorizar o acesso à sua própria planilha).
-   * O script gerará automaticamente:
+   * O Google solicitará permissão na primeira execução (clique em *Avançado* ➔ *Acessar projeto (não seguro)* para autorizar o script a manipular a sua planilha).
+   * O script criará automaticamente:
      * A aba **Lançamentos** com cabeçalhos estilizados, checkboxes e formatação de datas e moedas;
      * A aba **Config** com tabelas de Contas, Categorias e Modelos Rápidos já preenchidos com dados padrão essenciais;
-     * O menu personalizado **"⚙️ ID Finanças"** direto no topo da planilha para manutenções futuras.
-5. **Definindo seu Token de Segurança (Senha)**:
-   * Abra a aba **Config** na planilha.
+     * Um menu personalizado **"⚙️ ID Finanças"** direto na sua planilha para manutenções futuras.
+5. **Definindo sua Senha de Acesso (Token Secreto)**:
+   * Volte para a aba **Config** na planilha.
    * Na célula **V2** (abaixo de *Token_API* em **V1**), o script definirá a senha padrão `123456`.
-   * Você pode manter esse valor ou digitar a senha que desejar.
-6. **Implantando como Web App**:
-   * No Apps Script, clique no botão azul **Implantar** ➔ **Nova implantação**.
+   * Você pode manter essa senha ou alterá-la para o código/senha que preferir.
+6. **Implantando a API (Web App)**:
+   * No editor do Apps Script, clique no botão azul **Implantar** ➔ **Nova implantação**.
    * Clique na engrenagem ao lado de "Selecione o tipo" e escolha **Aplicativo da Web**.
    * Preencha:
      * **Descrição**: `API ID Finanças`
      * **Executar como**: *Eu (seu e-mail)*
-     * **Quem tem acesso**: *Qualquer pessoa* (imprescindível para que o frontend se comunique via API; a segurança dos seus dados é blindada pelo Token Secreto).
+     * **Quem tem acesso**: *Qualquer pessoa* (imprescindível para que o frontend se comunique com a planilha; a segurança dos seus dados é garantida pelo Token Secreto).
    * Clique em **Implantar** e copie a **URL do Aplicativo da Web** gerada (terminada em `/exec`).
 
-### 3. Conectando a Aplicação
-1. Abra o PWA no navegador (via Live Server ou sua hospedagem).
+### Passo 2: Conectar no Aplicativo Online
+1. Acesse o aplicativo: **[https://idfinancas.vercel.app/](https://idfinancas.vercel.app/)**
 2. Na tela de **Acesso Restrito**, insira:
-   * **URL do Web App (Google)**: Cole a URL copiada (`https://script.google.com/macros/s/.../exec`).
-   * **Token Secreto da Planilha**: A senha cadastrada na célula `V2` da sua aba `Config` (padrão: `123456`).
-3. Clique em **Desbloquear Sistema**. O app sincronizará imediatamente todas as contas, categorias e lançamentos!
+   * **URL do Web App (Google)**: Cole a URL copiada do passo anterior (`https://script.google.com/macros/s/.../exec`).
+   * **Token Secreto da Planilha**: A senha que está na célula `V2` da sua planilha (padrão: `123456`).
+3. Clique em **Desbloquear Sistema**.
+4. Pronto! O app sincronizará imediatamente todas as contas, categorias e relatórios. Você já pode instalar o PWA no seu celular ou desktop!
+
+---
+
+### Executando o Frontend Localmente (Opcional para Desenvolvedores)
+Caso queira clonar o repositório e rodar o projeto localmente:
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/ivanildodias/controle-financeiro-pwa.git
+   cd controle-financeiro-pwa
+   ```
+2. Inicie um servidor local HTTP (necessário para que o Service Worker do PWA funcione):
+   * **Opção A (VS Code)**: Instale a extensão **Live Server**, clique com botão direito em `index.html` e escolha *"Open with Live Server"*.
+   * **Opção B (Python)**:
+     ```bash
+     python3 -m http.server 8080
+     ```
+3. Abra `http://localhost:8080` ou `http://127.0.0.1:5500` no seu navegador.
 
 ---
 
