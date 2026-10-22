@@ -16,6 +16,8 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME).then(cache => {
       console.log('Arquivos em cache com sucesso.');
       return cache.addAll(ASSETS_TO_CACHE);
+    }).catch(err => {
+      console.warn('Aviso: Cache Storage ignorado (não suportado no protocolo atual):', err);
     })
   );
   self.skipWaiting();
@@ -38,8 +40,8 @@ self.addEventListener('activate', event => {
 
 // INTERCEPTAÇÃO: O robô atua quando o celular pede um arquivo
 self.addEventListener('fetch', event => {
-  // Ignora requisições POST (como a nossa comunicação com o Banco de Dados do Google)
-  if (event.request.method !== 'GET') return;
+  // Ignora requisições POST ou que não sejam HTTP/HTTPS (ex: file://, chrome-extension://)
+  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) return;
 
   event.respondWith(
     caches.match(event.request).then(response => {

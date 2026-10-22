@@ -81,12 +81,20 @@
   document.addEventListener('DOMContentLoaded', function() {
     
     // REGISTRO DO SERVICE WORKER (PWA OFFLINE)
+    // Só registra se estiver rodando via HTTP ou HTTPS (evita erro quando aberto como arquivo local file://)
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker ativado! Escopo:', reg.scope))
-          .catch(err => console.error('Falha ao registrar Service Worker:', err));
-      });
+      if (window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker ativado! Escopo:', reg.scope))
+            .catch(err => console.error('Falha ao registrar Service Worker:', err));
+        });
+      } else {
+        // Se estiver rodando como file://, desregistra workers antigos para não gerar erros no console
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => reg.unregister());
+        }).catch(() => {});
+      }
     }
 
     // SENSORES DE REDE (Avisa se a internet cair ou voltar)
@@ -435,12 +443,18 @@
   // ⚙️ 6. CONFIGURAÇÕES E FORMULÁRIOS (SELETORES)
   // ==========================================================================
   function renderizarSeletoresFormulario() {
+    configContas = descomprimir(configContas) || [];
+    configModelos = descomprimir(configModelos) || [];
+    configCategorias = descomprimir(configCategorias) || [];
+
     const selConta = document.getElementById('selConta');
     const selOrigem = document.getElementById('selContaOrigem');
     const selDestino = document.getElementById('selContaDestino');
     
     let htmlContas = '<option value="">Selecione...</option>';
-    configContas.forEach(c => htmlContas += `<option value="${c.nome}">${c.nome} (${c.tipo})</option>`);
+    if (Array.isArray(configContas)) {
+      configContas.forEach(c => htmlContas += `<option value="${c.nome}">${c.nome} (${c.tipo})</option>`);
+    }
     
     if (selConta) selConta.innerHTML = htmlContas;
     if (selOrigem) selOrigem.innerHTML = htmlContas;
@@ -449,9 +463,11 @@
     const selModL = document.getElementById('selModelosRacionados');
     if (selModL) {
       let htmlMods = '<option value="">Selecione um Modelo...</option>';
-      configModelos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(m => {
-        htmlMods += `<option value="${m.nome}">${m.nome} (${m.tipo.substring(0,3)})</option>`;
-      });
+      if (Array.isArray(configModelos)) {
+        configModelos.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).forEach(m => {
+          htmlMods += `<option value="${m.nome}">${m.nome} (${(m.tipo || '').substring(0,3)})</option>`;
+        });
+      }
       selModL.innerHTML = htmlMods;
     }
   }
@@ -1019,7 +1035,14 @@
       .then(res => { 
         if (res.error) mostrarNotificacao(res.error, "erro"); 
         else {
-          configContas = res.contas || []; configCategorias = res.categorias || []; configModelos = res.modelos || [];
+          configContas = descomprimir(res.contas) || [];
+          configCategorias = descomprimir(res.categorias) || [];
+          configModelos = descomprimir(res.modelos) || [];
+          localStorage.setItem('finance_cache_config', JSON.stringify({
+            contas: configContas,
+            categorias: configCategorias,
+            modelos: configModelos
+          }));
           renderizarConfigContas(); renderizarConfigCategorias(); renderizarConfigModelos(); renderizarSeletoresFormulario(); renderizarAuditoria(); atualizarDadosDashboard();
           aplicarFiltros(false);
         } 
@@ -3930,9 +3953,16 @@
              navigateToSection('dashboard');
              
              // OTIMIZAÇÃO: Usa os dados recebidos do teste de login para pular uma requisição!
-             configContas = dados.contas || [];
-             configCategorias = dados.categorias || [];
-             configModelos = dados.modelos || []; 
+             configContas = descomprimir(dados.contas) || [];
+             configCategorias = descomprimir(dados.categorias) || [];
+             configModelos = descomprimir(dados.modelos) || []; 
+
+             localStorage.setItem('finance_cache_config', JSON.stringify({
+               contas: configContas,
+               categorias: configCategorias,
+               modelos: configModelos
+             }));
+
              renderizarSeletoresFormulario();
              carregarLancamentosDoSheets();
              
@@ -3969,9 +3999,16 @@
          if (btn) { btn.disabled = false; btn.innerHTML = `<span class="material-icons text-base">security</span> <span class="texto-oculto-celular">Validar Credenciais</span>`; }
          mostrarNotificacao("Credenciais validadas e atualizadas!", "sucesso");
          
-         configContas = dados.contas || [];
-         configCategorias = dados.categorias || [];
-         configModelos = dados.modelos || []; 
+         configContas = descomprimir(dados.contas) || [];
+         configCategorias = descomprimir(dados.categorias) || [];
+         configModelos = descomprimir(dados.modelos) || []; 
+
+         localStorage.setItem('finance_cache_config', JSON.stringify({
+           contas: configContas,
+           categorias: configCategorias,
+           modelos: configModelos
+         }));
+
          renderizarSeletoresFormulario();
          carregarLancamentosDoSheets(); // Recarrega os dados sem piscar a tela
       })
