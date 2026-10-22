@@ -36,6 +36,46 @@
   const ITENS_POR_PAGINA_LEGENDA = 5;
 
   // ==========================================================================
+  // 🗜️ COMPRESSOR E SINCRONIZADOR DE SEGUNDO PLANO
+  // ==========================================================================
+  let syncCount = 0;
+  
+  function mostrarSync() {
+      syncCount++;
+      const pill = document.getElementById('syncIndicator');
+      if(pill) pill.classList.remove('hidden');
+  }
+  
+  function ocultarSync() {
+      syncCount--;
+      if (syncCount <= 0) {
+          syncCount = 0;
+          const pill = document.getElementById('syncIndicator');
+          if(pill) pill.classList.add('hidden');
+      }
+  }
+
+  // Pega a matriz leve da API e a reconstrói como Objetos no celular
+  function descomprimir(dadosComprimidos) {
+      // Verifica se o pacote tem a estrutura real de matriz (colunas e registros)
+      if (!dadosComprimidos || !dadosComprimidos.colunas || !dadosComprimidos.registros) return dadosComprimidos;
+      
+      return dadosComprimidos.registros.map(registro => {
+          let obj = {};
+          dadosComprimidos.colunas.forEach((coluna, index) => {
+              obj[coluna] = registro[index];
+          });
+          return obj;
+      });
+  }
+
+  // Limpa o cache antigo caso o usuário troque a senha/URL
+  function limparCacheDados() {
+      localStorage.removeItem('finance_cache_config');
+      localStorage.removeItem('finance_cache_lancamentos');
+  }
+
+  // ==========================================================================
   // 🚀 2. INICIALIZAÇÃO DO SISTEMA
   // ==========================================================================
   document.addEventListener('DOMContentLoaded', function() {
@@ -80,21 +120,53 @@
 
   function carregarParametrosIniciais() {
     const skHtml = `<div class="flex flex-col gap-3 w-full"><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div></div>`;
-    if(document.getElementById('listaConfigContas')) document.getElementById('listaConfigContas').innerHTML = skHtml;
-    if(document.getElementById('listaConfigCategorias')) document.getElementById('listaConfigCategorias').innerHTML = skHtml;
-    if(document.getElementById('listaConfigModelos')) document.getElementById('listaConfigModelos').innerHTML = skHtml;
+    
+    // 1. CARREGAMENTO INSTANTÂNEO (VIA CACHE DO CELULAR)
+    const cacheStr = localStorage.getItem('finance_cache_config');
+    if (cacheStr) {
+      const dadosCache = JSON.parse(cacheStr);
+      configContas = dadosCache.contas || [];
+      configCategorias = dadosCache.categorias || [];
+      configModelos = dadosCache.modelos || [];
+      renderizarSeletoresFormulario();
+      carregarLancamentosDoSheets(); // Pula direto pro próximo!
+    } else {
+      // Se for o 1º acesso (Sem Cache), mostra Skeletons
+      if(document.getElementById('listaConfigContas')) document.getElementById('listaConfigContas').innerHTML = skHtml;
+      if(document.getElementById('listaConfigCategorias')) document.getElementById('listaConfigCategorias').innerHTML = skHtml;
+      if(document.getElementById('listaConfigModelos')) document.getElementById('listaConfigModelos').innerHTML = skHtml;
+    }
 
+    mostrarSync(); // Gira o ícone!
+
+    // 2. SINCRONIZAÇÃO SILENCIOSA COM A NUVEM
     chamarBackend('obterDadosFormularioConfig')
-      .then(dados => {
-        if (dados.error) { mostrarNotificacao("Erro: " + dados.error, "erro"); return; }
-        configContas = dados.contas || [];
-        configCategorias = dados.categorias || [];
-        configModelos = dados.modelos || []; 
+      .then(dadosDaNuvem => {
+        // Descomprime os dados levinhos que chegaram do Google
+        const contasNuvem = descomprimir(dadosDaNuvem.contas) || [];
+        const catNuvem = descomprimir(dadosDaNuvem.categorias) || [];
+        const modNuvem = descomprimir(dadosDaNuvem.modelos) || [];
         
-        renderizarSeletoresFormulario();
-        carregarLancamentosDoSheets();
+        const novoCacheJson = JSON.stringify({ contas: contasNuvem, categorias: catNuvem, modelos: modNuvem });
+        
+        // Se houver diferença entre a nuvem e o celular, ele atualiza a tela
+        if (cacheStr !== novoCacheJson) {
+            localStorage.setItem('finance_cache_config', novoCacheJson);
+            configContas = contasNuvem; configCategorias = catNuvem; configModelos = modNuvem;
+            renderizarSeletoresFormulario();
+            
+            // Só redesenha as tabelas se a aba estiver aberta
+            if(document.getElementById('screen-config').classList.contains('active')) {
+                renderizarConfigContas(); renderizarConfigCategorias(); renderizarConfigModelos();
+            }
+        }
+        ocultarSync();
+        if (!cacheStr) carregarLancamentosDoSheets(); // Chama a próx etapa se era o 1º acesso
       })
-      .catch(err => mostrarNotificacao("Falha de rede ao carregar dados.", "erro"));
+      .catch(err => {
+        ocultarSync();
+        if (!cacheStr) mostrarNotificacao("Falha ao carregar configurações.", "erro");
+      });
   }
 
   // ==========================================================================
@@ -1223,58 +1295,63 @@
   // ⚙️ 12. INTEGRAÇÃO DOS FILTROS E PESQUISA
   // ==========================================================================
   function carregarLancamentosDoSheets() {
-    // Renderiza Skeletons nas Tabelas enquanto busca os dados
-    document.getElementById('tbodyLancamentos').innerHTML = `
-      <tr><td colspan="10" class="p-0"><div class="flex flex-col gap-2 p-3">
-        <div class="skeleton sk-rect" style="height: 45px;"></div>
-        <div class="skeleton sk-rect" style="height: 45px;"></div>
-        <div class="skeleton sk-rect" style="height: 45px;"></div>
-        <div class="skeleton sk-rect" style="height: 45px;"></div>
-        <div class="skeleton sk-rect" style="height: 45px;"></div>
-      </div></td></tr>`;
-      
-    const divCards = document.getElementById('divCardsLancamentos');
-    if(divCards) divCards.innerHTML = `
-      <div class="flex flex-col gap-3 w-full p-2">
-        <div class="skeleton sk-rect" style="height: 110px;"></div>
-        <div class="skeleton sk-rect" style="height: 110px;"></div>
-        <div class="skeleton sk-rect" style="height: 110px;"></div>
-      </div>`;
+    const skHtmlLista = `<tr><td colspan="10" class="p-0"><div class="flex flex-col gap-2 p-3"><div class="skeleton sk-rect" style="height: 45px;"></div><div class="skeleton sk-rect" style="height: 45px;"></div><div class="skeleton sk-rect" style="height: 45px;"></div></div></td></tr>`;
+    const skHtmlCards = `<div class="flex flex-col gap-3 w-full p-2"><div class="skeleton sk-rect" style="height: 110px;"></div><div class="skeleton sk-rect" style="height: 110px;"></div></div>`;
+    const skHtmlPivot = `<div class="flex flex-col gap-2 p-3 w-full"><div class="skeleton sk-rect" style="height: 35px;"></div><div class="skeleton sk-rect" style="height: 35px;"></div></div>`;
     
-    const divPivot = document.getElementById('dashListaPivotAnual');
-    if(divPivot) divPivot.innerHTML = `
-      <div class="flex flex-col gap-2 p-3 w-full">
-        <div class="skeleton sk-rect" style="height: 35px;"></div>
-        <div class="skeleton sk-rect" style="height: 35px;"></div>
-        <div class="skeleton sk-rect" style="height: 35px;"></div>
-        <div class="skeleton sk-rect" style="height: 35px;"></div>
-      </div>`;
-    
-    chamarBackend('obterLancamentos')
-      .then(dados => { 
-        if(dados.error){ mostrarNotificacao(dados.error,"erro"); return; } 
-        allLancamentos = dados || []; 
-        
-        if (!sistemaInicializado) {
-          if (estadoMultiSelect['fMes'].length === 0) {
-            const hoje = new Date();
-            estadoMultiSelect['fMes'] = [`${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`];
-          }
-          sistemaInicializado = true;
+    // 1. CARREGAMENTO INSTANTÂNEO DOS LANÇAMENTOS
+    const cacheStr = localStorage.getItem('finance_cache_lancamentos');
+    if (cacheStr) {
+      allLancamentos = JSON.parse(cacheStr);
+      if (!sistemaInicializado) {
+        if (estadoMultiSelect['fMes'].length === 0) {
+          const hoje = new Date();
+          estadoMultiSelect['fMes'] = [`${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`];
         }
+        sistemaInicializado = true;
+      }
+      inicializarDropdownMeses(); dadosFiltrados = [...allLancamentos]; aplicarFiltros(false); 
+      renderizarConfigContas(); renderizarConfigCategorias(); renderizarConfigModelos(); 
+      renderizarAuditoria(); preencherSeletorDashboard();
+    } else {
+      if (document.getElementById('tbodyLancamentos')) document.getElementById('tbodyLancamentos').innerHTML = skHtmlLista;
+      if (document.getElementById('divCardsLancamentos')) document.getElementById('divCardsLancamentos').innerHTML = skHtmlCards;
+      if (document.getElementById('dashListaPivotAnual')) document.getElementById('dashListaPivotAnual').innerHTML = skHtmlPivot;
+    }
+
+    mostrarSync();
+
+    // 2. SINCRONIZAÇÃO SILENCIOSA COM A NUVEM (Dados Comprimidos)
+    chamarBackend('obterLancamentos')
+      .then(dadosDaNuvem => { 
+        if(dadosDaNuvem.error){ ocultarSync(); return; } 
         
-        inicializarDropdownMeses(); 
-        dadosFiltrados = [...allLancamentos]; 
-        aplicarFiltros(false); 
+        const lancamentosNuvem = descomprimir(dadosDaNuvem) || [];
+        const novoCacheJson = JSON.stringify(lancamentosNuvem);
         
-        renderizarConfigContas(); 
-        renderizarConfigCategorias();
-        renderizarConfigModelos(); 
-        
-        renderizarAuditoria();
-        preencherSeletorDashboard();
+        // Só renderiza tudo de novo se tiver lançamento novo ou deletado!
+        if (cacheStr !== novoCacheJson) {
+            localStorage.setItem('finance_cache_lancamentos', novoCacheJson);
+            allLancamentos = lancamentosNuvem;
+            
+            if (!sistemaInicializado) {
+              if (estadoMultiSelect['fMes'].length === 0) {
+                const hoje = new Date();
+                estadoMultiSelect['fMes'] = [`${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`];
+              }
+              sistemaInicializado = true;
+            }
+            
+            inicializarDropdownMeses(); dadosFiltrados = [...allLancamentos]; aplicarFiltros(false); 
+            renderizarConfigContas(); renderizarConfigCategorias(); renderizarConfigModelos(); 
+            renderizarAuditoria(); preencherSeletorDashboard();
+        }
+        ocultarSync();
       })
-      .catch(err => mostrarNotificacao("Falha ao obter lançamentos: " + err.message, "erro"));
+      .catch(err => {
+        ocultarSync();
+        if(!cacheStr) mostrarNotificacao("Falha ao obter lançamentos da nuvem.", "erro");
+      });
   }
 
   function inicializarDropdownMeses() {
@@ -3767,9 +3844,14 @@
   }
 
   function desconectarApp() {
+    // 1. Apaga as credenciais de acesso
     localStorage.removeItem('finance_api_url');
     localStorage.removeItem('finance_api_token');
     
+    // 2. APAGA O CACHE DE DADOS DO CELULAR
+    limparCacheDados();
+    
+    // 3. Esconde a interface do App e revela a tela de Login
     document.querySelector('.app-container').style.display = 'none';
     document.getElementById('loginOverlay').classList.remove('hidden');
     
@@ -3779,6 +3861,7 @@
     if (document.getElementById('inpApiToken')) document.getElementById('inpApiToken').value = '';
     if (document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = '';
     
+    // 4. Limpa a memória RAM para evitar vazamentos
     allLancamentos = []; dadosFiltrados = []; dadosFuturos = [];
     configContas = []; configCategorias = []; configModelos = [];
   }

@@ -807,3 +807,11 @@
     .espacador-grid-api { display: none !important; }
     #boxDesconectarApp button { max-width: 100% !important; }
   }
+
+  /* ==========================================================================
+     12. SINCRONIZAÇÃO EM SEGUNDO PLANO (UX)
+     ========================================================================== */
+  .sync-pill { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 2000; background: var(--cor-destaque); color: white; padding: 6px 16px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; opacity: 1; pointer-events: none; }
+  .sync-pill.hidden { opacity: 0; bottom: 10px; display: inline-flex !important; }
+  @keyframes spinSync { 100% { transform: rotate(360deg); } }
+  .sync-spin { animation: spinSync 1.5s linear infinite; }
