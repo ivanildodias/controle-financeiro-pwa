@@ -88,6 +88,23 @@
           .catch(err => console.error('Falha ao registrar Service Worker:', err));
       });
     }
+
+    // SENSORES DE REDE (Avisa se a internet cair ou voltar)
+    function atualizarStatusRede() {
+        const banner = document.getElementById('offlineIndicator');
+        if (!navigator.onLine) {
+            if(banner) banner.classList.remove('hidden');
+        } else {
+            if(banner) banner.classList.add('hidden');
+            // Se a internet voltou e o usuário está logado, tenta sincronizar silenciosamente!
+            if (localStorage.getItem('finance_api_token') && typeof chamarBackend === 'function') {
+                carregarParametrosIniciais(); 
+            }
+        }
+    }
+    window.addEventListener('online', atualizarStatusRede);
+    window.addEventListener('offline', atualizarStatusRede);
+    atualizarStatusRede(); // Checa o status assim que o app abre
     
     configurarGerenciadorTema();
     const fonteSalva = localStorage.getItem('finance-font-size');

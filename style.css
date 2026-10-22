@@ -815,3 +815,9 @@
   .sync-pill.hidden { opacity: 0; bottom: 10px; display: inline-flex !important; }
   @keyframes spinSync { 100% { transform: rotate(360deg); } }
   .sync-spin { animation: spinSync 1.5s linear infinite; }
+
+  /* ==========================================================================
+     13. MODO OFF-LINE (PWA)
+     ========================================================================== */
+  .offline-banner { position: fixed; top: 0; left: 0; width: 100%; background-color: var(--cor-aviso); color: white; text-align: center; padding: 6px; font-size: 0.8rem; font-weight: bold; z-index: 4000; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: transform 0.3s ease; }
+  .offline-banner.hidden { transform: translateY(-100%); display: flex !important; /* Mantém o flex para a animação funcionar */ }
