@@ -1108,25 +1108,29 @@
     const tipoFluxo = document.querySelector('input[name="tipo_fluxo"]:checked').value;
     const isPago = document.getElementById('inpPago').checked; 
     const btn = document.querySelector('button[form="formLancamento"]'); 
-    const txt = btn.innerHTML; 
-    btn.disabled = true; btn.innerHTML = "Salvando...";
+    const txt = btn ? btn.innerHTML : "Salvar"; 
 
     if (tipoFluxo === 'TRANSFERENCIA') {
+        if (btn) { btn.disabled = true; btn.innerHTML = "Salvando..."; }
         const origem = document.getElementById('selContaOrigem').value;
         const destino = document.getElementById('selContaDestino').value;
         if (!origem || !destino || origem === destino) {
             mostrarNotificacao("Selecione contas de origem e destino diferentes.", "aviso");
-            btn.disabled = false; btn.innerHTML = txt; return;
+            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
+            return;
         }
         const dados = { descricao: document.getElementById('inpDescricao').value, valor: v, origem: origem, destino: destino, data_compra: document.getElementById('inpDataCompra').value, data_pag: document.getElementById('inpDataPag').value, observacoes: obsTratada };
         
         chamarBackend('adicionarTransferenciaServidor', dados)
           .then(res => { 
-            btn.disabled = false; btn.innerHTML = txt; 
-            if(res.error) mostrarNotificacao(res.error, "erro"); 
+            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
+            if (res && res.error) mostrarNotificacao(res.error, "erro"); 
             else { fecharModalLancamento(); mostrarNotificacao("Transferência Registrada!", "sucesso"); carregarLancamentosDoSheets(); } 
           })
-          .catch(err => { btn.disabled=false; btn.innerHTML=txt; mostrarNotificacao(err.message, "erro"); });
+          .catch(err => { 
+            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
+            mostrarNotificacao(err.message, "erro"); 
+          });
         
     } else {
         const isCredito = document.getElementById('inpNoCredito').checked;
@@ -1165,34 +1169,148 @@
                     pago: statusPagoParcela 
                 });
             }
+
+            // Identificadores para eventual reversão (Rollback)
+            const idsLote = new Set(loteRegistros.map(r => r.id));
+
+            // 1. Aplicação Otimista Imediata
+            allLancamentos.unshift(...loteRegistros);
+            localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+
+            // 2. Feedback e Interface Imediatos
+            fecharModalLancamento();
+            mostrarNotificacao(`${numParcelas} parcelas geradas!`, "sucesso");
+            mostrarSync();
+
+            inicializarDropdownMeses();
+            preencherSeletorDashboard();
+            aplicarFiltros(false);
+            atualizarDadosDashboard();
             
+            // 3. Persistência em Segundo Plano
             chamarBackend('importarEmLoteServidor', loteRegistros)
               .then(res => { 
-                btn.disabled = false; btn.innerHTML = txt; 
-                if(res.error) mostrarNotificacao(res.error, "erro"); 
-                else { fecharModalLancamento(); mostrarNotificacao(`${numParcelas} parcelas geradas!`, "sucesso"); carregarLancamentosDoSheets(); } 
+                ocultarSync();
+                if (res && res.error) throw new Error(res.error);
               })
-              .catch(err => { btn.disabled=false; btn.innerHTML=txt; mostrarNotificacao(err.message, "erro"); });
+              .catch(err => { 
+                ocultarSync();
+                allLancamentos = allLancamentos.filter(x => !idsLote.has(x.id));
+                localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+                inicializarDropdownMeses();
+                aplicarFiltros(false);
+                atualizarDadosDashboard();
+                mostrarNotificacao("Erro ao gerar parcelas. Alteração revertida.", "erro");
+              });
 
         } else {
+            // Lançamento Comum (Novo ou Edição)
+            const desc = document.getElementById('inpDescricao').value;
+            const cat = document.getElementById('selCategoria').value;
+            const con = document.getElementById('selConta').value;
+            const dCompra = document.getElementById('inpDataCompra').value;
+            const dPag = document.getElementById('inpDataPag').value;
+            const valorFinal = tipoFluxo === "DESPESA" ? -Math.abs(v) : Math.abs(v);
+
             const dados = { 
-              id: id || null, tipo_fluxo: tipoFluxo, 
-              descricao: document.getElementById('inpDescricao').value, valor: v, 
-              categoria: document.getElementById('selCategoria').value, conta: document.getElementById('selConta').value, 
+              id: id || null, 
+              tipo_fluxo: tipoFluxo, 
+              descricao: desc, 
+              valor: v, 
+              categoria: cat, 
+              conta: con, 
               no_credito: isCredito, 
-              data_compra: document.getElementById('inpDataCompra').value, data_pag: document.getElementById('inpDataPag').value, 
+              data_compra: dCompra, 
+              data_pag: dPag, 
               observacoes: obsTratada,
               pago: isPago
             };
-            
+
+            // 1. Simulação Local (Optimistic UI)
+            let tempId = null;
+            let indexExistente = -1;
+            let itemOriginal = null;
+
+            if (id) {
+              // Edição de Registro Existente
+              indexExistente = allLancamentos.findIndex(x => x.id === id);
+              if (indexExistente !== -1) {
+                itemOriginal = { ...allLancamentos[indexExistente] };
+                allLancamentos[indexExistente] = {
+                  ...allLancamentos[indexExistente],
+                  descricao: desc,
+                  valor: valorFinal,
+                  categoria: cat,
+                  conta: con,
+                  no_credito: isCredito,
+                  data_compra: dCompra,
+                  data_pag: dPag,
+                  observacoes: obsTratada,
+                  pago: isPago
+                };
+              }
+            } else {
+              // Novo Lançamento
+              tempId = 'TEMP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4).toUpperCase();
+              const novoItem = {
+                id: tempId,
+                data_compra: dCompra,
+                data_pag: dPag,
+                descricao: desc,
+                observacoes: obsTratada,
+                categoria: cat,
+                conta: con,
+                no_credito: isCredito,
+                valor: valorFinal,
+                pago: isPago
+              };
+              allLancamentos.unshift(novoItem);
+            }
+
+            // 2. Renderização Instantânea e Fechamento do Modal
+            localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+            fecharModalLancamento();
+            mostrarNotificacao(id ? "Atualizado!" : "Gravado!", "sucesso");
+            mostrarSync();
+
+            inicializarDropdownMeses();
+            preencherSeletorDashboard();
+            aplicarFiltros(false);
+            atualizarDadosDashboard();
+
+            // 3. Sincronização em Segundo Plano com a Nuvem
             const acao = id ? 'atualizarLancamento' : 'adicionarLancamento';
             chamarBackend(acao, dados)
               .then(res => { 
-                btn.disabled = false; btn.innerHTML = txt; 
-                if(res.error) mostrarNotificacao(res.error, "erro"); 
-                else { fecharModalLancamento(); mostrarNotificacao(id ? "Atualizado!" : "Gravado!", "sucesso"); carregarLancamentosDoSheets(); } 
+                ocultarSync();
+                if (res && res.error) throw new Error(res.error);
+
+                // Se o backend retornou ID oficial, substitui o tempId de forma transparente
+                if (!id && res) {
+                  const idReal = (typeof res === 'object' && res.id) ? res.id : (typeof res === 'string' ? res : null);
+                  if (idReal) {
+                    const item = allLancamentos.find(x => x.id === tempId);
+                    if (item) {
+                      item.id = idReal;
+                      localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+                    }
+                  }
+                }
               })
-              .catch(err => { btn.disabled=false; btn.innerHTML=txt; mostrarNotificacao(err.message, "erro"); });
+              .catch(err => { 
+                ocultarSync();
+                // 4. Mecanismo de Rollback (Reversão)
+                if (!id) {
+                  allLancamentos = allLancamentos.filter(x => x.id !== tempId);
+                } else if (indexExistente !== -1 && itemOriginal) {
+                  allLancamentos[indexExistente] = itemOriginal;
+                }
+                localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+                inicializarDropdownMeses();
+                aplicarFiltros(false);
+                atualizarDadosDashboard();
+                mostrarNotificacao("Erro ao salvar. Alteração revertida.", "erro");
+              });
         }
     }
   }
