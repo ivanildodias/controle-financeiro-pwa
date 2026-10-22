@@ -80,13 +80,39 @@
   // ==========================================================================
   document.addEventListener('DOMContentLoaded', function() {
     
-    // REGISTRO DO SERVICE WORKER (PWA OFFLINE)
+    // REGISTRO DO SERVICE WORKER (PWA OFFLINE COM AUTO-RELOAD E CACHE BUSTING)
     // Só registra se estiver rodando via HTTP ou HTTPS (evita erro quando aberto como arquivo local file://)
     if ('serviceWorker' in navigator) {
       if (window.location.protocol.startsWith('http')) {
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker ativado! Escopo:', reg.scope))
+            .then(reg => {
+              console.log('Service Worker ativado! Escopo:', reg.scope);
+
+              // Se já houver um worker esperando ativação, solicita skipWaiting
+              if (reg.waiting && navigator.serviceWorker.controller) {
+                reg.waiting.postMessage({ action: 'skipWaiting' });
+              }
+
+              // Detecta quando uma nova versão terminar de baixar
+              reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                if (!installingWorker) return;
+                installingWorker.onstatechange = () => {
+                  if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    installingWorker.postMessage({ action: 'skipWaiting' });
+                  }
+                };
+              };
+            })
             .catch(err => console.error('Falha ao registrar Service Worker:', err));
         });
       } else {
@@ -1119,6 +1145,12 @@
   // ==========================================================================
   function processarEnvioLancamento(e) {
     e.preventDefault();
+
+    // TRAVA ANTI-ROLLBACK OFFLINE
+    if (!navigator.onLine) {
+      mostrarNotificacao("Ação indisponível offline. Conecte-se para salvar alterações.", "aviso");
+      return;
+    }
     
     let valStr = document.getElementById('inpValor').value;
     let v = parseFloat(valStr.replace(/\./g, '').replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
@@ -1134,25 +1166,82 @@
     const txt = btn ? btn.innerHTML : "Salvar"; 
 
     if (tipoFluxo === 'TRANSFERENCIA') {
-        if (btn) { btn.disabled = true; btn.innerHTML = "Salvando..."; }
         const origem = document.getElementById('selContaOrigem').value;
         const destino = document.getElementById('selContaDestino').value;
         if (!origem || !destino || origem === destino) {
             mostrarNotificacao("Selecione contas de origem e destino diferentes.", "aviso");
-            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
             return;
         }
-        const dados = { descricao: document.getElementById('inpDescricao').value, valor: v, origem: origem, destino: destino, data_compra: document.getElementById('inpDataCompra').value, data_pag: document.getElementById('inpDataPag').value, observacoes: obsTratada };
+
+        const dCompra = document.getElementById('inpDataCompra').value;
+        const dPag = document.getElementById('inpDataPag').value;
+        const desc = document.getElementById('inpDescricao').value.trim() || "Transferência entre contas";
+
+        const idOut = 'TEMP_TRF_' + Date.now() + '_OUT';
+        const idIn = 'TEMP_TRF_' + (Date.now() + 1) + '_IN';
+
+        const regOut = {
+          id: idOut,
+          data_compra: dCompra,
+          data_pag: dPag,
+          descricao: desc,
+          observacoes: obsTratada,
+          categoria: 'Movimentações',
+          conta: origem,
+          no_credito: false,
+          valor: -Math.abs(v),
+          pago: true
+        };
+
+        const regIn = {
+          id: idIn,
+          data_compra: dCompra,
+          data_pag: dPag,
+          descricao: desc,
+          observacoes: obsTratada,
+          categoria: 'Movimentações',
+          conta: destino,
+          no_credito: false,
+          valor: Math.abs(v),
+          pago: true
+        };
+
+        // 1. Aplicação Otimista Imediata
+        allLancamentos.unshift(regOut, regIn);
+        localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+
+        fecharModalLancamento();
+        mostrarNotificacao("Transferência Registrada!", "sucesso");
+        mostrarSync();
+
+        inicializarDropdownMeses();
+        preencherSeletorDashboard();
+        aplicarFiltros(false);
+        atualizarDadosDashboard();
+
+        const dados = { descricao: desc, valor: v, origem: origem, destino: destino, data_compra: dCompra, data_pag: dPag, observacoes: obsTratada };
         
         chamarBackend('adicionarTransferenciaServidor', dados)
           .then(res => { 
-            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
-            if (res && res.error) mostrarNotificacao(res.error, "erro"); 
-            else { fecharModalLancamento(); mostrarNotificacao("Transferência Registrada!", "sucesso"); carregarLancamentosDoSheets(); } 
+            ocultarSync();
+            if (res && res.error) throw new Error(res.error);
+            if (res && res.idOut && res.idIn) {
+              const itemOut = allLancamentos.find(x => x.id === idOut);
+              const itemIn = allLancamentos.find(x => x.id === idIn);
+              if (itemOut) itemOut.id = res.idOut;
+              if (itemIn) itemIn.id = res.idIn;
+              localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+            }
           })
           .catch(err => { 
-            if (btn) { btn.disabled = false; btn.innerHTML = txt; }
-            mostrarNotificacao(err.message, "erro"); 
+            ocultarSync();
+            allLancamentos = allLancamentos.filter(x => x.id !== idOut && x.id !== idIn);
+            localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+            inicializarDropdownMeses();
+            preencherSeletorDashboard();
+            aplicarFiltros(false);
+            atualizarDadosDashboard();
+            mostrarNotificacao("Erro ao transferir. Alteração revertida.", "erro");
           });
         
     } else {
@@ -2152,6 +2241,10 @@
     document.getElementById('btnConfirmCancelar').onclick = () => fecharJanela('confirmModal');
     document.getElementById('btnConfirmSim').onclick = () => {
       fecharJanela('confirmModal');
+      if (!navigator.onLine) {
+        mostrarNotificacao("Ação indisponível offline. Conecte-se para excluir.", "aviso");
+        return;
+      }
       mostrarNotificacao("Excluindo...", "aviso");
       chamarBackend('excluirLancamento', id)
         .then(res => { if(res.error) mostrarNotificacao(res.error, "erro"); else { mostrarNotificacao("Excluído!"); carregarLancamentosDoSheets(); } })
@@ -2336,6 +2429,12 @@
 
   function processarEdicaoLote(e) {
     e.preventDefault();
+
+    if (!navigator.onLine) {
+      mostrarNotificacao("Ação indisponível offline. Conecte-se para salvar alterações.", "aviso");
+      return;
+    }
+
     const desc = document.getElementById('inpLoteDescricao').value.trim();
     const cat = document.getElementById('selLoteCategoria').value;
     const con = document.getElementById('selLoteConta').value;
@@ -2357,18 +2456,51 @@
     const ids = Array.from(itensSelecionadosLote);
     const alteracoes = { descricao: desc || null, categoria: cat || null, conta: con || null, no_credito: valCredito, pago: valPago, data_compra: dComp || null, data_pag: dPag || null, observacoes: obs || null };
     
-    const btn = document.getElementById('btnSalvarLote');
-    btn.disabled = true; btn.innerHTML = "Aplicando...";
-    mostrarNotificacao("Atualizando lote, aguarde...", "aviso");
-    
+    // 1. Snapshot dos registros originais para eventual Rollback
+    const snapshotOriginais = allLancamentos.filter(x => ids.includes(x.id)).map(x => ({ ...x }));
+
+    // 2. Aplicação Otimista Imediata em RAM
+    allLancamentos.forEach(item => {
+      if (ids.includes(item.id)) {
+        if (desc) item.descricao = desc;
+        if (cat) item.categoria = cat;
+        if (con) item.conta = con;
+        if (obs) item.observacoes = obs;
+        if (valCredito !== null) item.no_credito = valCredito;
+        if (valPago !== null) item.pago = valPago;
+        if (dComp) item.data_compra = dComp;
+        if (dPag) item.data_pag = dPag;
+      }
+    });
+
+    localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+    fecharModalLote();
+    cancelarLote();
+    mostrarNotificacao(`${ids.length} itens atualizados!`, "sucesso");
+    mostrarSync();
+
+    inicializarDropdownMeses();
+    preencherSeletorDashboard();
+    aplicarFiltros(false);
+    atualizarDadosDashboard();
+
+    // 3. Sincronização em Segundo Plano com a Nuvem
     chamarBackend('atualizarLoteServidor', { ids: ids, alteracoes: alteracoes })
       .then(res => {
-        btn.disabled = false; btn.innerHTML = "Aplicar Alterações";
-        if(res.error) { mostrarNotificacao(res.error, "erro"); } 
-        else { fecharModalLote(); cancelarLote(); mostrarNotificacao(`Sucesso! ${res.contagem} itens atualizados.`); carregarLancamentosDoSheets(); }
+        ocultarSync();
+        if (res && res.error) throw new Error(res.error);
       })
       .catch(err => {
-        btn.disabled = false; btn.innerHTML = "Aplicar Alterações"; mostrarNotificacao("Falha de comunicação: " + err.message, "erro");
+        ocultarSync();
+        // 4. Mecanismo de Rollback: Restaura os itens anteriores
+        const mapaOriginais = new Map(snapshotOriginais.map(x => [x.id, x]));
+        allLancamentos = allLancamentos.map(item => mapaOriginais.get(item.id) || item);
+        localStorage.setItem('finance_cache_lancamentos', JSON.stringify(allLancamentos));
+        inicializarDropdownMeses();
+        preencherSeletorDashboard();
+        aplicarFiltros(false);
+        atualizarDadosDashboard();
+        mostrarNotificacao("Erro ao atualizar lote. Alteração revertida.", "erro");
       });
   }
 
@@ -2382,6 +2514,10 @@
     document.getElementById('btnConfirmCancelar').onclick = () => fecharJanela('confirmModal');
     document.getElementById('btnConfirmSim').onclick = () => { 
       fecharJanela('confirmModal');
+      if (!navigator.onLine) {
+        mostrarNotificacao("Ação indisponível offline. Conecte-se para excluir.", "aviso");
+        return;
+      }
       mostrarNotificacao(`Excluindo ${qtd} itens...`, "aviso"); 
       const ids = Array.from(itensSelecionadosLote);
       
@@ -3903,20 +4039,20 @@
     const token = localStorage.getItem('finance_api_token');
     const url = localStorage.getItem('finance_api_url');
     
-    const overlay = document.getElementById('loginOverlay');
+    const landing = document.getElementById('landingContainer');
     const appContainer = document.querySelector('.app-container');
     const boxSair = document.getElementById('boxDesconectarApp');
 
     if (url && token) {
-        overlay.classList.add('hidden');
-        appContainer.style.display = 'flex';
-        if(boxSair) boxSair.classList.remove('hidden');
-        if(document.getElementById('inpConfigApiUrl')) document.getElementById('inpConfigApiUrl').value = url;
-        if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
+        if (landing) landing.classList.add('hidden');
+        if (appContainer) appContainer.style.display = 'flex';
+        if (boxSair) boxSair.classList.remove('hidden');
+        if (document.getElementById('inpConfigApiUrl')) document.getElementById('inpConfigApiUrl').value = url;
+        if (document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
         carregarParametrosIniciais();
     } else {
-        appContainer.style.display = 'none';
-        overlay.classList.remove('hidden');
+        if (appContainer) appContainer.style.display = 'none';
+        if (landing) landing.classList.remove('hidden');
     }
   }
 
@@ -3941,11 +4077,13 @@
          mostrarNotificacao("Conexão autorizada! Carregando dados...", "sucesso");
          
          try {
-             document.getElementById('loginOverlay').classList.add('hidden');
+             fecharJanela('loginModal');
+             const landing = document.getElementById('landingContainer');
+             if (landing) landing.classList.add('hidden');
              document.querySelector('.app-container').style.display = 'flex';
              
              const boxSair = document.getElementById('boxDesconectarApp');
-             if(boxSair) boxSair.classList.remove('hidden');
+             if (boxSair) boxSair.classList.remove('hidden');
              
              if(document.getElementById('inpConfigApiUrl')) document.getElementById('inpConfigApiUrl').value = url;
              if(document.getElementById('inpConfigApiToken')) document.getElementById('inpConfigApiToken').value = token;
@@ -4032,9 +4170,10 @@
     // 2. APAGA O CACHE DE DADOS DO CELULAR
     limparCacheDados();
     
-    // 3. Esconde a interface do App e revela a tela de Login
+    // 3. Esconde a interface do App e revela a Landing Page
     document.querySelector('.app-container').style.display = 'none';
-    document.getElementById('loginOverlay').classList.remove('hidden');
+    const landing = document.getElementById('landingContainer');
+    if (landing) landing.classList.remove('hidden');
     
     const boxSair = document.getElementById('boxDesconectarApp');
     if (boxSair) boxSair.classList.add('hidden');

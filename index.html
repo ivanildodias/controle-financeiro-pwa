@@ -20,30 +20,139 @@
   </div>
 
   <!-- ==========================================================================
-       OVERLAY DE AUTENTICAÇÃO (LOGIN HÍBRIDO)
+       TELA INICIAL / LANDING PAGE (USUÁRIO NÃO AUTENTICADO)
        ========================================================================== -->
-  <div id="loginOverlay" class="hidden flex items-center justify-center bg-principal absolute z-50 w-full h-full" style="top:0; left:0; min-height: 100vh;">
-    <div class="card-painel max-w-sm w-full shadow-inner m-5 relative">
-      <div class="text-center mb-5 mt-2">
-        <span class="material-icons text-perigo text-5xl mb-2">gpp_bad</span>
-        <h2 class="m-0 text-principal text-xl font-bold">Acesso Restrito</h2>
-        <p class="text-sm text-suave m-0 mt-1">Conecte-se à base de dados para continuar.</p>
+  <div id="landingContainer" class="landing-page hidden">
+    <!-- Navbar -->
+    <header class="landing-nav">
+      <div class="landing-brand">
+        <span class="material-icons text-destaque" style="font-size: 2rem;">monetization_on</span>
+        <span class="landing-brand-title">Meu Controle Financeiro</span>
       </div>
-      
-      <div id="grupoUrlApi" class="form-group">
-        <label>URL do Web App (Google)</label>
-        <input type="url" id="inpApiUrl" class="form-control font-mono text-xs" placeholder="https://script.google.com/.../exec">
+      <div class="landing-nav-actions">
+        <a href="https://github.com/ivanildodias/controle-financeiro-pwa" target="_blank" class="btn-github-link" title="Repositório no GitHub">
+          <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+          <span class="texto-oculto-celular">GitHub</span>
+        </a>
+        <button onclick="abrirJanela('loginModal')" class="btn btn-primario btn-sm">
+          <span class="material-icons text-sm">login</span> Conectar
+        </button>
       </div>
-      
-      <div class="form-group mb-5">
-        <label>Token Secreto da Planilha</label>
-        <input type="password" id="inpApiToken" class="form-control" placeholder="Digite a senha">
+    </header>
+
+    <!-- Hero Section -->
+    <section class="landing-hero">
+      <div class="landing-badge">
+        <span class="material-icons text-sucesso" style="font-size: 1rem;">verified_user</span>
+        <span>100% Gratuito, Privado &amp; Serverless</span>
       </div>
-      
-      <button id="btnLoginSystem" onclick="conectarApp()" class="btn btn-primario w-full flex items-center justify-center gap-2 text-base h-41">
-        <span class="material-icons">login</span> Desbloquear Sistema
-      </button>
-    </div>
+      <h1 class="landing-hero-title">
+        Controle financeiro pessoal inteligente, direto no seu Google Sheets.
+      </h1>
+      <p class="landing-hero-subtitle">
+        Um PWA moderno com resposta instantânea e suporte off-line. Seus dados financeiros pertencem a você e ficam armazenados com total privacidade no seu próprio Google Drive.
+      </p>
+      <div class="landing-hero-cta">
+        <button onclick="abrirJanela('loginModal')" class="btn btn-primario btn-lg pulse-btn">
+          <span class="material-icons">cloud_sync</span> Conectar Minha Planilha
+        </button>
+        <a href="#landingPassos" class="btn btn-secundario btn-lg">
+          <span class="material-icons">help_outline</span> Como Funciona
+        </a>
+      </div>
+    </section>
+
+    <!-- Passos em 3 Etapas -->
+    <section id="landingPassos" class="landing-section">
+      <div class="landing-section-header">
+        <span class="landing-section-tag">Fácil e Rápido</span>
+        <h2>Comece a usar em 3 passos simples</h2>
+        <p>Você só precisa de uma conta Google gratuita. Nenhum cadastro ou pagamento necessário.</p>
+      </div>
+
+      <div class="landing-steps-grid">
+        <div class="landing-step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon-wrap">
+            <span class="material-icons text-sucesso">table_chart</span>
+          </div>
+          <h3>Crie a Planilha</h3>
+          <p>Abra uma nova planilha em branco no Google Sheets com 1 clique.</p>
+          <a href="https://sheets.new" target="_blank" class="btn btn-sm btn-secundario mt-auto">
+            <span class="material-icons text-xs">launch</span> Abrir sheets.new
+          </a>
+        </div>
+
+        <div class="landing-step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon-wrap">
+            <span class="material-icons text-destaque">code</span>
+          </div>
+          <h3>Cole o Script</h3>
+          <p>No menu Extensões &gt; Apps Script, cole o código do backend e clique em <em>Inicializar</em>.</p>
+          <a href="https://github.com/ivanildodias/controle-financeiro-pwa/blob/main/backend/codigo.gs" target="_blank" class="btn btn-sm btn-secundario mt-auto">
+            <span class="material-icons text-xs">description</span> Ver codigo.gs
+          </a>
+        </div>
+
+        <div class="landing-step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon-wrap">
+            <span class="material-icons text-aviso">rocket_launch</span>
+          </div>
+          <h3>Conecte e Use</h3>
+          <p>Implante como Web App, copie a URL gerada e conecte aqui. Pronto!</p>
+          <button onclick="abrirJanela('loginModal')" class="btn btn-sm btn-primario mt-auto">
+            <span class="material-icons text-xs">login</span> Conectar Agora
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Destaques / Vantagens -->
+    <section class="landing-section bg-card-subtle">
+      <div class="landing-section-header">
+        <span class="landing-section-tag">Recursos</span>
+        <h2>Tudo o que você precisa para dominar suas finanças</h2>
+      </div>
+
+      <div class="landing-features-grid">
+        <div class="feature-card">
+          <span class="material-icons text-destaque feature-icon">security</span>
+          <h4>Privacidade Absoluta</h4>
+          <p>Seus dados viajam direto do seu navegador para a sua planilha Google. Nenhum intermediário tem acesso aos seus gastos.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="material-icons text-sucesso feature-icon">flash_on</span>
+          <h4>Interface Otimista</h4>
+          <p>Lançamentos, transferências e edições com atualização instantânea no mesmo milissegundo, sem esperas de rede.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="material-icons text-aviso feature-icon">credit_card</span>
+          <h4>Gestão de Faturas &amp; Cartões</h4>
+          <p>Cálculo de fechamento e vencimento de cartões, status da fatura (Aberta, Fechada, Paga) e parcelamento automático.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="material-icons text-perigo feature-icon">devices</span>
+          <h4>PWA Instalável &amp; Offline</h4>
+          <p>Instale como aplicativo nativo no celular ou computador. Consulte seus saldos e relatórios mesmo no modo avião.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="landing-footer-content">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-destaque">monetization_on</span>
+          <strong>ID Finanças</strong>
+        </div>
+        <p class="text-xs text-suave m-0">Código aberto sob licença MIT. Feito por <a href="https://github.com/ivanildodias" target="_blank" class="text-destaque font-bold">Ivanildo Dias</a>.</p>
+      </div>
+    </footer>
   </div>
 
   <!-- ==========================================================================
@@ -689,6 +798,39 @@
        ========================================================================== -->
   <div id="modalBackdrop" class="modal-backdrop hidden"></div>
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Modal: Conexão com a Planilha (Login) -->
+  <div id="loginModal" class="modal-box hidden">
+    <div class="modal-header">
+      <h3 class="flex items-center gap-2 m-0 text-destaque">
+        <span class="material-icons">admin_panel_settings</span>
+        <span class="text-principal">Conectar Planilha</span>
+      </h3>
+      <button type="button" class="modal-close" onclick="fecharJanela('loginModal')">&times;</button>
+    </div>
+    
+    <div class="modal-body p-4">
+      <p class="text-sm text-suave m-0 mb-4">Insira a URL do seu Web App no Google Apps Script e o Token configurado na aba <strong>Config</strong> (célula V2).</p>
+      
+      <div id="grupoUrlApi" class="form-group mb-3">
+        <label>URL do Web App (Google)</label>
+        <input type="url" id="inpApiUrl" class="form-control font-mono text-xs" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      
+      <div class="form-group mb-2">
+        <label>Token Secreto (Senha da Planilha)</label>
+        <input type="password" id="inpApiToken" class="form-control" placeholder="Digite a senha (padrão inicial: 123456)">
+      </div>
+      <span class="text-xs text-suave">Dica: Na inicialização automática do script, o token padrão inicial é <code>123456</code>.</span>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secundario" onclick="fecharJanela('loginModal')">Cancelar</button>
+      <button id="btnLoginSystem" onclick="conectarApp()" class="btn btn-primario flex items-center justify-center gap-2">
+        <span class="material-icons">login</span> Desbloquear Sistema
+      </button>
+    </div>
+  </div>
 
   <!-- Modal: Filtros Avançados -->
   <div id="filtrosModal" class="modal-box hidden">

@@ -1,4 +1,11 @@
-const CACHE_NAME = 'finance-pwa-v1';
+const CACHE_NAME = 'finance-pwa-v2';
+
+// Ouvinte para mensagens do cliente (permite ativação imediata sob demanda)
+self.addEventListener('message', event => {
+  if (event.data && (event.data.action === 'skipWaiting' || event.data === 'skipWaiting')) {
+    self.skipWaiting();
+  }
+});
 
 // Arquivos estruturais do aplicativo (A "Casca")
 const ASSETS_TO_CACHE = [
