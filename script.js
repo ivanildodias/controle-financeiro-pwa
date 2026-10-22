@@ -277,9 +277,15 @@
     if (!chkModoEscuro) return;
 
     const temaSalvo = localStorage.getItem('finance-theme');
-    if (temaSalvo === 'dark') {
+    // Padrão do sistema: DARK (só é modo claro se explicitamente salvo como 'light')
+    const ehDark = temaSalvo !== 'light';
+
+    if (ehDark) {
       document.body.setAttribute('data-theme', 'dark');
       chkModoEscuro.checked = true;
+    } else {
+      document.body.removeAttribute('data-theme');
+      chkModoEscuro.checked = false;
     }
 
     const paletaSalva = localStorage.getItem('finance-palette');

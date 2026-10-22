@@ -12,7 +12,13 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
-<body>
+<body data-theme="dark">
+  <script>
+    // Execução síncrona imediata antes da primeira pintura de tela para evitar flash
+    if (localStorage.getItem('finance-theme') === 'light') {
+      document.body.removeAttribute('data-theme');
+    }
+  </script>
   <!-- Barra de Aviso Off-line -->
   <div id="offlineIndicator" class="offline-banner hidden">
     <span class="material-icons text-sm">wifi_off</span>
@@ -110,7 +116,7 @@
     </section>
 
     <!-- Destaques / Vantagens -->
-    <section class="landing-section bg-card-subtle">
+    <section id="landingRecursos" class="landing-section bg-card-subtle">
       <div class="landing-section-header">
         <span class="landing-section-tag">Recursos</span>
         <h2>Tudo o que você precisa para dominar suas finanças</h2>
