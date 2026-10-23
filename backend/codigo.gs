@@ -108,8 +108,9 @@ function inicializarBancoDeDados() {
   if (sheetConfig.getRange(2, 1).getValue() === "") {
     const contasPadrao = [
       ["Carteira", "Dinheiro", "", "", "", "#27ae60"],
-      ["Conta Corrente", "Conta Corrente", "", "", "", "#3498db"],
-      ["Cartão de Crédito", "Crédito", 1, 10, 2000, "#e74c3c"],
+      ["Conta Corrente Principal", "Conta Corrente;Crédito", 10, 17, 3000, "#3498db"],
+      ["Cartão de Crédito Reserva", "Crédito", 5, 12, 1500, "#e74c3c"],
+      ["Vale Refeição / Alimentação", "Benefício", "", "", "", "#e67e22"],
       ["Reserva de Emergência", "Investimentos", "", "", "", "#f39c12"]
     ];
     sheetConfig.getRange(2, 1, contasPadrao.length, HEADERS_CONTAS.length).setValues(contasPadrao);
@@ -118,16 +119,41 @@ function inicializarBancoDeDados() {
   // Categorias essenciais padrão com ícones Material Icons
   if (sheetConfig.getRange(2, COLUNA_INICIAL_CATEGORIAS).getValue() === "") {
     const categoriasPadrao = [
-      ["Alimentação", "Despesas Essenciais", "restaurant", "Supermercado, feira e refeições"],
-      ["Moradia", "Despesas Essenciais", "home", "Aluguel, condomínio, luz, água"],
-      ["Transporte", "Despesas Essenciais", "directions_car", "Combustível, transporte público, manutenção"],
-      ["Saúde", "Despesas Essenciais", "medical_services", "Farmácia, consultas e plano"],
-      ["Lazer", "Despesas Não Essenciais", "sports_esports", "Passeios, streaming e restaurantes"],
-      ["Educação", "Despesas Não Essenciais", "school", "Cursos e livros"],
-      ["Faturas", "Despesas Essenciais", "credit_card", "Pagamento de faturas de cartão"],
-      ["Movimentações", "Transferências Pessoais", "swap_horiz", "Transferências entre contas"],
-      ["Salário", "Receitas", "payments", "Rendimentos do trabalho"],
-      ["Rendimentos", "Retorno Investimentos", "trending_up", "Juros e dividendos"]
+      // Despesas Essenciais
+      ["Moradia", "Despesas Essenciais", "home", "Aluguel, condomínio, IPTU e seguros residenciais."],
+      ["Contas Básicas", "Despesas Essenciais", "receipt_long", "Água, luz, internet, celular e gás."],
+      ["Mercado", "Despesas Essenciais", "shopping_cart", "Compras de supermercado, feira, padaria e açougue."],
+      ["Saúde", "Despesas Essenciais", "medical_services", "Plano de saúde, consultas, exames e farmácia."],
+      ["Educação", "Despesas Essenciais", "school", "Mensalidades, cursos, livros e materiais escolares."],
+      ["Casa", "Despesas Essenciais", "chair", "Manutenção, limpeza, móveis e utilidades do lar."],
+      ["Dívidas", "Despesas Essenciais", "account_balance", "Parcelas de empréstimos, financiamentos e renegociações."],
+
+      // Despesas Não Essenciais
+      ["Comer Fora", "Despesas Não Essenciais", "restaurant", "Restaurantes, lanchonetes, delivery e barzinhos."],
+      ["Transporte", "Despesas Não Essenciais", "directions_car", "Combustível, aplicativos (Uber/99) e manutenção."],
+      ["Compras Pessoais", "Despesas Não Essenciais", "shopping_bag", "Roupas, calçados, perfumes e cuidados pessoais."],
+      ["Lazer", "Despesas Não Essenciais", "attractions", "Cinema, passeios, viagens, shows e esportes."],
+      ["Assinaturas", "Despesas Não Essenciais", "subscriptions", "Streaming de vídeo/música e softwares mensais."],
+      ["Família", "Despesas Não Essenciais", "family_restroom", "Gastos diretos e necessidades da família e dependentes."],
+      ["Multas e Juros", "Despesas Não Essenciais", "warning", "Juros por atraso, tarifas evitáveis e penalidades."],
+
+      // Montante Investido
+      ["Aportes", "Montante Investido", "trending_up", "Transferência para corretora ou aplicações financeiras."],
+      ["Custos de Invest.", "Montante Investido", "receipt", "Taxas B3, emolumentos e IR retido na fonte."],
+
+      // Receitas (inclui Estornos com regra especial para cartão de crédito)
+      ["Salários", "Receitas", "payments", "Salário principal, adiantamentos e renda fixa do trabalho."],
+      ["Renda Extra", "Receitas", "savings", "Trabalhos freelancers, vendas e bicos esporádicos."],
+      ["Bônus e Benefícios", "Receitas", "card_giftcard", "13º salário, férias, PLR e vales empresariais."],
+      ["Estornos", "Receitas", "currency_exchange", "Estornos de compras, devoluções e créditos em cartão/conta."],
+
+      // Retorno Investimentos
+      ["Proventos", "Retorno Investimentos", "pie_chart", "Dividendos, JCP, aluguéis de FIIs e rendimentos."],
+      ["Resgates", "Retorno Investimentos", "account_balance_wallet", "Retirada de aplicações que retorna para a conta corrente."],
+
+      // Transferências Pessoais
+      ["Faturas", "Transferências Pessoais", "credit_score", "Pagamento de fatura do cartão de crédito."],
+      ["Movimentações", "Transferências Pessoais", "sync_alt", "Transferências entre contas próprias e ajustes neutros."]
     ];
     sheetConfig.getRange(2, COLUNA_INICIAL_CATEGORIAS, categoriasPadrao.length, HEADERS_CATEGORIAS.length).setValues(categoriasPadrao);
   }
@@ -135,9 +161,10 @@ function inicializarBancoDeDados() {
   // Modelos Rápidos padrão
   if (sheetConfig.getRange(2, COLUNA_INICIAL_MODELOS).getValue() === "") {
     const modelosPadrao = [
-      ["Almoço / Lanche", "DESPESA", "Almoço diário", "", "", "Alimentação", "Carteira", false],
-      ["Supermercado do Mês", "DESPESA", "Compras do mês", "", "", "Alimentação", "Cartão de Crédito", true],
-      ["Salário Mensal", "RECEITA", "Salário", "", "", "Salário", "Conta Corrente", false]
+      ["Supermercado", "DESPESA", "Compras do mês", "Alimentos e limpeza", "", "Mercado", "Conta Corrente Principal", true],
+      ["Almoço / Lanche", "DESPESA", "Almoço diário", "Refeição no trabalho", "", "Comer Fora", "Vale Refeição / Alimentação", false],
+      ["Salário Mensal", "RECEITA", "Salário", "Entrada mensal", "", "Salários", "Conta Corrente Principal", false],
+      ["Rendimentos / Proventos", "RECEITA", "Proventos recebidos", "Dividendos e JCP", "", "Proventos", "Conta Corrente Principal", false]
     ];
     sheetConfig.getRange(2, COLUNA_INICIAL_MODELOS, modelosPadrao.length, HEADERS_MODELOS.length).setValues(modelosPadrao);
   }
