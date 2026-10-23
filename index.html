@@ -32,7 +32,7 @@
     <!-- Navbar -->
     <header class="landing-nav">
       <div class="landing-brand">
-        <span class="material-icons text-destaque" style="font-size: 2rem;">monetization_on</span>
+        <span class="material-icons text-destaque text-3xl">monetization_on</span>
         <span class="landing-brand-title">Meu Controle Financeiro</span>
       </div>
       <div class="landing-nav-actions">
@@ -49,7 +49,7 @@
     <!-- Hero Section -->
     <section class="landing-hero">
       <div class="landing-badge">
-        <span class="material-icons text-sucesso" style="font-size: 1rem;">verified_user</span>
+        <span class="material-icons text-sucesso text-base">verified_user</span>
         <span>100% Gratuito, Privado &amp; Serverless</span>
       </div>
       <h1 class="landing-hero-title">
@@ -168,8 +168,8 @@
     
     <header class="sidebar">
       <div class="sidebar-brand" title="Expandir/Recolher Menu" onclick="document.body.classList.toggle('menu-colapsado'); localStorage.setItem('menuStateCollapsed', document.body.classList.contains('menu-colapsado'));">
-         <span class="material-icons" style="font-size: 2.2rem; color: var(--cor-destaque);">monetization_on</span>
-         <span class="brand-text" style="color: #fff; font-size: 1.15rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Meu Controle Financeiro</span>
+         <span class="material-icons icon-destaque-lg">monetization_on</span>
+         <span class="brand-text">Meu Controle Financeiro</span>
       </div>
       
       <nav class="sidebar-nav">
@@ -195,7 +195,7 @@
               <span class="material-icons">dashboard</span> Painel Geral
             </span>
             <span class="mobile-only-flex items-center justify-center gap-2 text-lg w-full">
-              <span class="material-icons text-destaque" style="font-size: 1.8rem;">monetization_on</span> Meu Controle Financeiro
+              <span class="material-icons text-destaque icon-lg">monetization_on</span> Meu Controle Financeiro
             </span>
           </h2>
           <div class="dashboard-controles-topo flex items-center gap-3">
@@ -213,7 +213,7 @@
         <div id="dashResumoGrid" class="dashboard-resumo-grid dashboard-area">
           
           <div class="dash-card dash-card-receita">
-            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">arrow_upward</span>
+            <span class="material-icons card-bg-icon">arrow_upward</span>
             <div class="dash-card-header z-10 relative"><span>Receitas</span><span class="material-icons text-sucesso">arrow_upward</span></div>
             <div class="dash-card-body flex-col z-10 relative">
               <h3 id="dashValorReceita" class="text-principal">R$ 0,00</h3>
@@ -222,7 +222,7 @@
           </div>
 
           <div class="dash-card dash-card-despesa">
-            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">arrow_downward</span>
+            <span class="material-icons card-bg-icon">arrow_downward</span>
             <div class="dash-card-header z-10 relative"><span>Despesas</span><span class="material-icons text-perigo">arrow_downward</span></div>
             <div class="dash-card-body flex-col z-10 relative">
               <h3 id="dashValorDespesa" class="text-principal">R$ 0,00</h3>
@@ -231,7 +231,7 @@
           </div>
 
           <div class="dash-card dash-card-saldo">
-            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">account_balance_wallet</span>
+            <span class="material-icons card-bg-icon">account_balance_wallet</span>
             <div class="dash-card-header z-10 relative"><span>Balanço</span><span class="material-icons text-destaque">account_balance_wallet</span></div>
             <div class="dash-card-body flex-col z-10 relative">
               <h3 id="dashValorBalanço" class="text-principal">R$ 0,00</h3>
@@ -240,7 +240,7 @@
           </div>
 
           <div class="dash-card dash-card-total">
-            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">account_balance</span>
+            <span class="material-icons card-bg-icon">account_balance</span>
             <div class="dash-card-header z-10 relative"><span>Caixa / Corrente</span><span class="material-icons text-suave">account_balance</span></div>
             <div class="dash-card-body flex-col z-10 relative">
               <h3 id="dashTotalCorrente" class="text-principal">R$ 0,00</h3>
@@ -249,7 +249,7 @@
           </div>
 
           <div class="dash-card dash-card-invest">
-            <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 110px; right: -15px; bottom: -20px; color: var(--texto-principal);">trending_up</span>
+            <span class="material-icons card-bg-icon">trending_up</span>
             <div class="dash-card-header z-10 relative"><span>Investimentos</span><span class="material-icons text-sucesso">trending_up</span></div>
             <div class="dash-card-body flex-col z-10 relative">
               <h3 id="dashTotalInvest" class="text-sucesso">R$ 0,00</h3>
@@ -268,13 +268,13 @@
             </h3>
             <div id="boxGraficoFluxo" class="w-full relative min-h-250">
               <div class="flex items-end justify-between w-full h-full p-4 gap-2 absolute top-0 bottom-0 left-0 right-0">
-                <div class="skeleton w-full" style="height: 30%;"></div>
-                <div class="skeleton w-full" style="height: 70%;"></div>
-                <div class="skeleton w-full" style="height: 50%;"></div>
-                <div class="skeleton w-full" style="height: 90%;"></div>
-                <div class="skeleton w-full" style="height: 40%;"></div>
-                <div class="skeleton w-full" style="height: 60%;"></div>
-                <div class="skeleton w-full" style="height: 80%;"></div>
+                <div class="skeleton sk-bar-30"></div>
+                <div class="skeleton sk-bar-70"></div>
+                <div class="skeleton sk-bar-50"></div>
+                <div class="skeleton sk-bar-90"></div>
+                <div class="skeleton sk-bar-40"></div>
+                <div class="skeleton sk-bar-60"></div>
+                <div class="skeleton sk-bar-80"></div>
               </div>
             </div>
           </div>
@@ -303,9 +303,9 @@
             </h3>
             <div id="dashListaSaldos" class="carousel-cards py-1 w-full">
               <div class="flex gap-3 w-full p-2 overflow-hidden">
-                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
-                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
-                <div class="skeleton sk-rect shrink-0" style="width: 280px; height: 150px;"></div>
+                <div class="skeleton sk-rect sk-card-resumo"></div>
+                <div class="skeleton sk-rect sk-card-resumo"></div>
+                <div class="skeleton sk-rect sk-card-resumo"></div>
               </div>
             </div>
           </div>
@@ -388,10 +388,10 @@
           </h3>
           <div class="tabela-container border-none rounded-none shadow-none" id="dashListaPivotAnual">
             <div class="flex flex-col gap-2 p-3 w-full">
-              <div class="skeleton sk-rect" style="height: 35px;"></div>
-              <div class="skeleton sk-rect" style="height: 35px;"></div>
-              <div class="skeleton sk-rect" style="height: 35px;"></div>
-              <div class="skeleton sk-rect" style="height: 35px;"></div>
+              <div class="skeleton sk-rect sk-h-35"></div>
+              <div class="skeleton sk-rect sk-h-35"></div>
+              <div class="skeleton sk-rect sk-h-35"></div>
+              <div class="skeleton sk-rect sk-h-35"></div>
             </div>
           </div>
         </div>
@@ -450,13 +450,13 @@
         </div>
 
         <!-- Barra de Ações em Lote -->
-        <div id="barraAcoesLote" class="hidden flex items-center justify-between w-full p-2 mb-3 rounded" style="position: sticky; z-index: 970; background: var(--cor-destaque); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+        <div id="barraAcoesLote" class="barra-acoes-lote hidden">
           <span class="font-bold ml-2"><span id="contadorLote">0</span> selecionado(s)</span>
           <div class="flex gap-2">
-            <button onclick="alternarSelecaoTodosMobile()" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none; font-weight: bold; padding: 4px 8px;" title="Selecionar Todos"><span class="material-icons text-base">checklist</span></button>
-            <button onclick="confirmarExclusaoLote()" class="btn btn-sm btn-perigo" style="padding: 4px 8px; border: none;" title="Excluir Lote"><span class="material-icons text-base mr-1">delete</span><span class="btn-texto">Excluir</span></button>
-            <button onclick="abrirModalEdicaoLote()" class="btn btn-sm" style="background: white; color: var(--cor-destaque); border: none; font-weight: bold; padding: 4px 8px;" title="Editar Lote"><span class="material-icons text-base mr-1">edit</span><span class="btn-texto">Editar</span></button>
-            <button onclick="cancelarLote()" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 4px 8px;" title="Cancelar"><span class="material-icons text-base">close</span></button>
+            <button onclick="alternarSelecaoTodosMobile()" class="btn btn-sm btn-lote-transparente" title="Selecionar Todos"><span class="material-icons text-base">checklist</span></button>
+            <button onclick="confirmarExclusaoLote()" class="btn btn-sm btn-perigo" title="Excluir Lote"><span class="material-icons text-base mr-1">delete</span><span class="btn-texto">Excluir</span></button>
+            <button onclick="abrirModalEdicaoLote()" class="btn btn-sm btn-lote-branco" title="Editar Lote"><span class="material-icons text-base mr-1">edit</span><span class="btn-texto">Editar</span></button>
+            <button onclick="cancelarLote()" class="btn btn-sm btn-lote-transparente" title="Cancelar"><span class="material-icons text-base">close</span></button>
           </div>
         </div>
 
@@ -464,23 +464,23 @@
         <details id="containerFuturos" class="cat-group tema-neutro gaveta-futuros hidden">
           <summary class="cat-summary gaveta-futuros-summary">
             <div class="gaveta-futuros-titulo">
-              <span class="material-icons" style="color:var(--cor-aviso);">update</span>
+              <span class="material-icons text-aviso">update</span>
               <span id="txtResumoFuturos">Lançamentos Futuros</span>
             </div>
             <div id="txtValoresFuturos" class="valores-futuros-badge"></div>
           </summary>
           
-          <div class="cat-content" style="background: var(--bg-principal); padding: 15px;">
+          <div class="cat-content bg-principal p-3">
              <!-- Tabela de Futuros (Desktop) -->
              <div class="tabela-container" id="tabelaFuturosCont">
                <table class="data-table">
                   <thead>
                     <tr>
-                      <th class="text-center" style="width: 32px;"><input type="checkbox" id="chkSelectAllFuturos" onchange="alternarSelecaoTodos(this.checked, 'futuros')" class="cursor-pointer chk-padrao" title="Selecionar todos os futuros visíveis"></th>
+                      <th class="col-chk"><input type="checkbox" id="chkSelectAllFuturos" onchange="alternarSelecaoTodos(this.checked, 'futuros')" class="cursor-pointer chk-padrao" title="Selecionar todos os futuros visíveis"></th>
                       <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('data_compra')">Dt. Com. <span id="seta-futuro-data_compra"></span></th>
                       <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('data_pag')">Dt. Pag. <span id="seta-futuro-data_pag"></span></th>
-                      <th class="cursor-pointer" style="min-width: 160px;" onclick="mudarOrdenacaoFuturos('descricao')">Descrição <span id="seta-futuro-descricao"></span></th>
-                      <th class="cursor-pointer" style="min-width: 180px;" onclick="mudarOrdenacaoFuturos('observacoes')">Observações <span id="seta-futuro-observacoes"></span></th>
+                      <th class="cursor-pointer col-desc" onclick="mudarOrdenacaoFuturos('descricao')">Descrição <span id="seta-futuro-descricao"></span></th>
+                      <th class="cursor-pointer col-obs" onclick="mudarOrdenacaoFuturos('observacoes')">Observações <span id="seta-futuro-observacoes"></span></th>
                       <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('categoria')">Categoria <span id="seta-futuro-categoria"></span></th>
                       <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacaoFuturos('conta')">Conta/Cartão <span id="seta-futuro-conta"></span></th>
                       <th class="cursor-pointer text-right whitespace-nowrap" onclick="mudarOrdenacaoFuturos('valor')">Valor <span id="seta-futuro-valor"></span></th>
@@ -493,7 +493,7 @@
              
              <!-- Cards de Futuros (Mobile) -->
              <div class="cards-container" id="cardsFuturosCont">
-               <div id="divCardsFuturos" style="display:flex; flex-direction:column; gap:12px; width:100%;"></div>
+               <div id="divCardsFuturos" class="cards-futuros-lista"></div>
              </div>
 
              <!-- Paginação Exclusiva dos Futuros -->
@@ -511,11 +511,11 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th class="text-center" style="width: 32px;"><input type="checkbox" id="chkSelectAll" onchange="alternarSelecaoTodos(this.checked, 'principal')" class="cursor-pointer chk-padrao" title="Selecionar todos da página atual"></th>
+                <th class="col-chk"><input type="checkbox" id="chkSelectAll" onchange="alternarSelecaoTodos(this.checked, 'principal')" class="cursor-pointer chk-padrao" title="Selecionar todos da página atual"></th>
                 <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('data_compra')">Dt. Com. <span id="seta-data_compra"></span></th>
                 <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('data_pag')">Dt. Pag. <span id="seta-data_pag"></span></th>
-                <th class="cursor-pointer" style="min-width: 160px;" onclick="mudarOrdenacao('descricao')">Descrição <span id="seta-descricao"></span></th>
-                <th class="cursor-pointer" style="min-width: 180px;" onclick="mudarOrdenacao('observacoes')">Observações <span id="seta-observacoes"></span></th>
+                <th class="cursor-pointer col-desc" onclick="mudarOrdenacao('descricao')">Descrição <span id="seta-descricao"></span></th>
+                <th class="cursor-pointer col-obs" onclick="mudarOrdenacao('observacoes')">Observações <span id="seta-observacoes"></span></th>
                 <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('categoria')">Categoria <span id="seta-categoria"></span></th>
                 <th class="cursor-pointer whitespace-nowrap" onclick="mudarOrdenacao('conta')">Conta/Cartão <span id="seta-conta"></span></th>
                 <th class="cursor-pointer text-right whitespace-nowrap" onclick="mudarOrdenacao('valor')">Valor <span id="seta-valor"></span></th>
@@ -526,11 +526,11 @@
               <tr>
                 <td colspan="10" class="p-0">
                   <div class="flex flex-col gap-2 p-3">
-                    <div class="skeleton sk-rect" style="height: 45px;"></div>
-                    <div class="skeleton sk-rect" style="height: 45px;"></div>
-                    <div class="skeleton sk-rect" style="height: 45px;"></div>
-                    <div class="skeleton sk-rect" style="height: 45px;"></div>
-                    <div class="skeleton sk-rect" style="height: 45px;"></div>
+                    <div class="skeleton sk-rect sk-h-45"></div>
+                    <div class="skeleton sk-rect sk-h-45"></div>
+                    <div class="skeleton sk-rect sk-h-45"></div>
+                    <div class="skeleton sk-rect sk-h-45"></div>
+                    <div class="skeleton sk-rect sk-h-45"></div>
                   </div>
                 </td>
               </tr>
@@ -541,9 +541,9 @@
         <!-- Cards (Mobile) -->
         <div class="cards-container" id="divCardsLancamentos">
           <div class="flex flex-col gap-3 w-full p-2">
-            <div class="skeleton sk-rect" style="height: 110px;"></div>
-            <div class="skeleton sk-rect" style="height: 110px;"></div>
-            <div class="skeleton sk-rect" style="height: 110px;"></div>
+            <div class="skeleton sk-rect sk-h-110"></div>
+            <div class="skeleton sk-rect sk-h-110"></div>
+            <div class="skeleton sk-rect sk-h-110"></div>
           </div>
         </div>
 
@@ -579,7 +579,7 @@
           <button class="sub-tab-btn active" onclick="alternarSubAba('sistema')"><span class="material-icons">dns</span> Sistema</button>
           <button class="sub-tab-btn" onclick="alternarSubAba('personalizacao')"><span class="material-icons">palette</span> Aparência</button>
           <button class="sub-tab-btn" onclick="alternarSubAba('importacao')"><span class="material-icons">cloud_upload</span> Importar / Limpar</button>
-          <button class="sub-tab-btn" onclick="alternarSubAba('auditoria')"><span class="material-icons" style="font-size: 1.15rem;">security</span> Auditoria</button>
+          <button class="sub-tab-btn" onclick="alternarSubAba('auditoria')"><span class="material-icons">security</span> Auditoria</button>
         </div>
 
         <!-- 3.1 Aba Sistema -->
@@ -638,9 +638,9 @@
               </div>
               <div id="listaConfigContas" class="list-container">
                 <div class="flex flex-col gap-3 w-full">
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
                 </div>
               </div>
             </div>
@@ -659,9 +659,9 @@
               </div>
               <div id="listaConfigCategorias" class="list-container">
                 <div class="flex flex-col gap-3 w-full">
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
                 </div>
               </div>
             </div>
@@ -680,9 +680,9 @@
               </div>
               <div id="listaConfigModelos" class="list-container">
                 <div class="flex flex-col gap-3 w-full">
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
-                  <div class="skeleton sk-rect" style="height: 55px;"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
+                  <div class="skeleton sk-rect sk-h-55"></div>
                 </div>
               </div>
             </div>
@@ -713,11 +713,11 @@
               <strong class="block text-base mb-1">Cor de Destaque</strong>
               <span class="text-sm text-suave block mb-3">Escolha a paleta de cores principal do sistema.</span>
               <div class="flex gap-3">
-                <button data-cor="azul" onclick="mudarPaletaCor('azul')" class="palette-btn" style="background-color: #3498db;" title="Azul Padrão"></button>
-                <button data-cor="esmeralda" onclick="mudarPaletaCor('esmeralda')" class="palette-btn" style="background-color: #27ae60;" title="Verde Esmeralda"></button>
-                <button data-cor="ametista" onclick="mudarPaletaCor('ametista')" class="palette-btn" style="background-color: #9b59b6;" title="Roxo Ametista"></button>
-                <button data-cor="outono" onclick="mudarPaletaCor('outono')" class="palette-btn" style="background-color: #e67e22;" title="Laranja Outono"></button>
-                <button data-cor="rubi" onclick="mudarPaletaCor('rubi')" class="palette-btn" style="background-color: #e74c3c;" title="Vermelho Rubi"></button>
+                <button data-cor="azul" onclick="mudarPaletaCor('azul')" class="palette-btn" title="Azul Padrão"></button>
+                <button data-cor="esmeralda" onclick="mudarPaletaCor('esmeralda')" class="palette-btn" title="Verde Esmeralda"></button>
+                <button data-cor="ametista" onclick="mudarPaletaCor('ametista')" class="palette-btn" title="Roxo Ametista"></button>
+                <button data-cor="outono" onclick="mudarPaletaCor('outono')" class="palette-btn" title="Laranja Outono"></button>
+                <button data-cor="rubi" onclick="mudarPaletaCor('rubi')" class="palette-btn" title="Vermelho Rubi"></button>
               </div>
             </div>
 
@@ -1111,7 +1111,7 @@
         </div>
         
         <div class="text-xs text-suave bg-principal p-2 rounded border border-dashed mb-3 flex items-start gap-2">
-          <span class="material-icons text-destaque" style="font-size: 1rem;">info</span>
+          <span class="material-icons text-destaque text-base">info</span>
           <span><strong>Atenção:</strong> A <strong>primeira tag</strong> define onde o saldo aparecerá no Dashboard. A tag "Crédito" habilita o controle de faturas.</span>
         </div>
 
@@ -1193,8 +1193,8 @@
 
   <!-- Modal: Confirmação Perigosa -->
   <div id="confirmModal" class="modal-box modal-confirma-box hidden">
-    <div class="modal-header" style="background: var(--bg-perigo);"><h3 style="color: var(--cor-perigo);"><span class="material-icons">report_problem</span> Atenção</h3></div>
-    <div id="confirmModalBody" class="modal-body" style="font-size: 1rem; line-height: 1.5;"></div>
+    <div class="modal-header modal-header-perigo"><h3><span class="material-icons">report_problem</span> Atenção</h3></div>
+    <div id="confirmModalBody" class="modal-body modal-body-confirma"></div>
     <div class="modal-footer">
       <button id="btnConfirmCancelar" class="btn btn-secundario">Cancelar</button>
       <button id="btnConfirmSim" class="btn btn-perigo">Confirmar Exclusão</button>
