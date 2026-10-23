@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-pwa-v2';
+const CACHE_NAME = 'finance-pwa-v3.0.5.4';
 
 // Ouvinte para mensagens do cliente (permite ativação imediata sob demanda)
 self.addEventListener('message', event => {

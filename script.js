@@ -179,7 +179,7 @@
   });
 
   function carregarParametrosIniciais() {
-    const skHtml = `<div class="flex flex-col gap-3 w-full"><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div></div>`;
+    const skHtml = `<div class="flex flex-col gap-3 w-full"><div class="skeleton sk-rect sk-h-55"></div><div class="skeleton sk-rect sk-h-55"></div><div class="skeleton sk-rect sk-h-55"></div></div>`;
     
     // 1. CARREGAMENTO INSTANTÂNEO (VIA CACHE DO CELULAR)
     const cacheStr = localStorage.getItem('finance_cache_config');
@@ -656,7 +656,7 @@
         itensHtml += `
           <div class="cat-item">
             <div class="flex items-start gap-3 flex-1 min-w-0">
-              <span class="material-icons text-suave mt-1 shrink-0" style="font-size: 1.4rem;">${c.icone || 'local_offer'}</span>
+              <span class="material-icons text-suave mt-1 shrink-0 icon-md">${c.icone || 'local_offer'}</span>
               <div class="flex-col flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <strong class="text-base text-principal truncate">${c.nome}</strong>
@@ -1058,7 +1058,7 @@
   }
 
   function recarregarConfiguracoesGerais() {
-    const skHtml = `<div class="flex flex-col gap-3 w-full"><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div><div class="skeleton sk-rect" style="height: 55px;"></div></div>`;
+    const skHtml = `<div class="flex flex-col gap-3 w-full"><div class="skeleton sk-rect sk-h-55"></div><div class="skeleton sk-rect sk-h-55"></div><div class="skeleton sk-rect sk-h-55"></div></div>`;
     if(document.getElementById('listaConfigContas')) document.getElementById('listaConfigContas').innerHTML = skHtml;
     if(document.getElementById('listaConfigCategorias')) document.getElementById('listaConfigCategorias').innerHTML = skHtml;
     if(document.getElementById('listaConfigModelos')) document.getElementById('listaConfigModelos').innerHTML = skHtml;
@@ -1447,7 +1447,7 @@
       container.innerHTML = `
           <div class="tag-input-container" onclick="focarTagInput('${idFiltro}')">
               <div class="tag-input-box" id="box-${idFiltro}">
-                  <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;" id="badges-${idFiltro}"></div>
+                  <div class="flex flex-wrap gap-1 items-center" id="badges-${idFiltro}"></div>
                   <input type="text" id="input-${idFiltro}" class="tag-input-field" placeholder="${placeholder}" oninput="filtrarDropdownTag('${idFiltro}')" onfocus="filtrarDropdownTag('${idFiltro}')" onkeydown="handleTagKeydown(event, '${idFiltro}')">
               </div>
               <div class="tag-dropdown" id="dropdown-${idFiltro}"></div>
@@ -1557,9 +1557,9 @@
   // ⚙️ 12. INTEGRAÇÃO DOS FILTROS E PESQUISA
   // ==========================================================================
   function carregarLancamentosDoSheets() {
-    const skHtmlLista = `<tr><td colspan="10" class="p-0"><div class="flex flex-col gap-2 p-3"><div class="skeleton sk-rect" style="height: 45px;"></div><div class="skeleton sk-rect" style="height: 45px;"></div><div class="skeleton sk-rect" style="height: 45px;"></div></div></td></tr>`;
-    const skHtmlCards = `<div class="flex flex-col gap-3 w-full p-2"><div class="skeleton sk-rect" style="height: 110px;"></div><div class="skeleton sk-rect" style="height: 110px;"></div></div>`;
-    const skHtmlPivot = `<div class="flex flex-col gap-2 p-3 w-full"><div class="skeleton sk-rect" style="height: 35px;"></div><div class="skeleton sk-rect" style="height: 35px;"></div></div>`;
+    const skHtmlLista = `<tr><td colspan="10" class="p-0"><div class="flex flex-col gap-2 p-3"><div class="skeleton sk-rect sk-h-45"></div><div class="skeleton sk-rect sk-h-45"></div><div class="skeleton sk-rect sk-h-45"></div></div></td></tr>`;
+    const skHtmlCards = `<div class="flex flex-col gap-3 w-full p-2"><div class="skeleton sk-rect sk-h-110"></div><div class="skeleton sk-rect sk-h-110"></div></div>`;
+    const skHtmlPivot = `<div class="flex flex-col gap-2 p-3 w-full"><div class="skeleton sk-rect sk-h-35"></div><div class="skeleton sk-rect sk-h-35"></div></div>`;
     
     // 1. CARREGAMENTO INSTANTÂNEO DOS LANÇAMENTOS
     const cacheStr = localStorage.getItem('finance_cache_lancamentos');
@@ -1931,7 +1931,7 @@
       cb.appendChild(b);
     };
 
-    addBtn('<span class="material-icons text-aviso" style="font-size:1.2rem; margin:0;">chevron_left</span>', paginaAtualFuturos - 1, false, paginaAtualFuturos === 1);
+    addBtn('<span class="material-icons text-aviso icon-sm m-0">chevron_left</span>', paginaAtualFuturos - 1, false, paginaAtualFuturos === 1);
     
     let startPage = Math.max(1, paginaAtualFuturos - 2); let endPage = Math.min(tP, paginaAtualFuturos + 2);
     if (paginaAtualFuturos <= 3) { endPage = Math.min(5, tP); }
@@ -1941,7 +1941,78 @@
     for (let i = startPage; i <= endPage; i++) addBtn(i, i, i === paginaAtualFuturos);
     if (endPage < tP) { if (endPage < tP - 1) addBtn('...', null, false, true); addBtn(tP, tP); }
     
-    addBtn('<span class="material-icons text-aviso" style="font-size:1.2rem; margin:0;">chevron_right</span>', paginaAtualFuturos + 1, false, paginaAtualFuturos === tP);
+    addBtn('<span class="material-icons text-aviso icon-sm m-0">chevron_right</span>', paginaAtualFuturos + 1, false, paginaAtualFuturos === tP);
+  }
+
+  function renderizarLinhaTabelaLancamento(d) {
+    return `
+      <tr id="row-${d.id}" class="${d.isSelected ? 'linha-selecionada' : ''} ${d.opacityClass}">
+        <td class="col-chk">
+          <input type="checkbox" class="chk-lote chk-padrao" data-id="${d.id}" onchange="alternarSelecaoLote('${d.id}', this.checked)" ${d.isSelected ? 'checked' : ''}>
+        </td>
+        <td class="text-sm whitespace-nowrap">${d.dC}</td>
+        <td class="text-sm whitespace-nowrap">${d.dP}</td>
+        <td>
+          <div class="flex items-center gap-1">
+            ${d.iconePago} 
+            <strong class="${d.textClassDesc}">${d.descricao}</strong>
+            ${d.iconeCreditoTabela}
+          </div>
+        </td>
+        <td><div class="text-sm text-suave italic max-w-sm leading-tight">${d.observacoes || '—'}</div></td>
+        <td>
+          <span class="inline-flex items-center gap-1 bg-principal p-1 rounded text-sm whitespace-nowrap">
+            <span class="material-icons text-suave icon-sm">${d.iconeCat}</span>
+            <span class="leading-none">${d.categoria}</span>
+          </span>
+        </td>
+        <td>
+          <span class="inline-flex items-center gap-1 whitespace-nowrap text-sm">
+            <span class="bolinha-cor" style="background:${d.cor};"></span>
+            <span class="leading-none">${d.conta}</span>
+          </span>
+        </td>
+        <td class="text-right whitespace-nowrap font-bold ${d.clsValor}">${d.prefixoValor}${d.valF}</td>
+        <td class="text-center">
+          <div class="flex items-center justify-center gap-1">
+            <button onclick="prepararCopia('${d.id}')" class="btn-icone p-1 text-suave" title="Duplicar"><i class="material-icons text-base">content_copy</i></button>
+            <button onclick="prepararEdicao('${d.id}')" class="btn-icone p-1 icone-edit" title="Editar"><i class="material-icons text-base">edit</i></button>
+            <button onclick="confirmarExclusao('${d.id}')" class="btn-icone p-1 icone-delete" title="Excluir"><i class="material-icons text-base">delete</i></button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  function renderizarCardMobileLancamento(d) {
+    return `
+      <div id="card-${d.id}" class="card-lancamento ${d.isSelected ? 'card-selecionado' : ''} ${d.opacityClass}" style="border-left: 4px solid ${d.cor};" onmousedown="iniciarToqueLongo(event, '${d.id}')" onmouseup="cancelarToqueLongo()" onmouseleave="cancelarToqueLongo()" ontouchstart="iniciarToqueLongo(event, '${d.id}')" ontouchend="cancelarToqueLongo()" onclick="cliqueCard(event, '${d.id}')">
+        <input type="checkbox" class="chk-lote hidden" data-id="${d.id}" onchange="alternarSelecaoLote('${d.id}', this.checked)" ${d.isSelected ? 'checked' : ''}>
+        
+        <div class="flex justify-between items-center mb-2">
+          <div class="text-xs text-suave font-medium flex gap-2 shrink-0"><span>C: ${d.dC}</span><span>•</span><span>P: ${d.dP}</span></div>
+          <div class="flex gap-1 shrink-0">
+            <button onclick="prepararCopia('${d.id}')" class="btn-icone btn-mini text-suave" title="Duplicar"><span class="material-icons text-lg">content_copy</span></button>
+            <button onclick="prepararEdicao('${d.id}')" class="btn-icone btn-mini icone-edit" title="Editar"><span class="material-icons text-lg">edit</span></button>
+            <button onclick="confirmarExclusao('${d.id}')" class="btn-icone btn-mini icone-delete" title="Excluir"><span class="material-icons text-lg">delete</span></button>
+          </div>
+        </div>
+        
+        <div class="text-base font-bold ${d.textClassDesc} flex items-start gap-2 mb-2 line-clamp-2 leading-tight">
+          ${d.iconePago}
+          <span class="flex-1">${d.descricao}</span>
+          ${d.badgeCreditoCard}
+        </div>
+        
+        ${d.observacoes ? `<div class="text-xs text-suave bg-principal p-1 rounded mb-2 truncate italic">Obs: ${d.observacoes}</div>` : ''}
+        
+        <div class="card-lancamento-footer">
+          <div class="flex-col flex-1 gap-1 min-w-0">
+            <span class="text-xs text-suave flex items-center gap-1 truncate"><span class="material-icons text-sm shrink-0">${d.iconeCat}</span><span class="truncate">${d.categoria}</span></span>
+            <span class="text-xs text-suave flex items-center gap-1 truncate"><span class="bolinha-cor shrink-0" style="background:${d.cor};"></span><span class="truncate">${d.conta}</span></span>
+          </div>
+          <div class="text-lg font-bold shrink-0 text-right ${d.clsValor}">${d.prefixoValor}${d.valF}</div>
+        </div>
+      </div>`;
   }
 
   function gerarHtmlLancamento(l, isFuturo = false) {
@@ -1958,85 +2029,37 @@
     const dP = l.data_pag ? new Date(l.data_pag).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '—';
 
     const iconePago = l.pago 
-      ? `<span class="material-icons shrink-0" style="font-size: 1.1rem; color: var(--cor-sucesso);" title="Pago">check_circle</span>` 
-      : `<span class="material-icons shrink-0" style="font-size: 1.1rem; color: var(--cor-aviso);" title="Pendente">schedule</span>`;
+      ? `<span class="material-icons icon-status-pago" title="Pago">check_circle</span>` 
+      : `<span class="material-icons icon-status-pendente" title="Pendente">schedule</span>`;
     
-    const iconeCreditoTabela = l.no_credito ? `<span class="material-icons shrink-0" style="color:${cor}; font-size:1.15rem;" title="Crédito">credit_card</span>` : '';
+    const iconeCreditoTabela = l.no_credito ? `<span class="material-icons shrink-0 icon-sm" style="color:${cor};" title="Crédito">credit_card</span>` : '';
     const badgeCreditoCard = l.no_credito ? `<span class="badge-credito shrink-0" style="background:${cor}20; color:${cor};"><span class="material-icons text-xs">credit_card</span></span>` : '';
 
-    const opacityClass = isFuturo ? 'opacity-80' : '';
-    const textClassDesc = isFuturo ? 'text-suave' : 'text-principal';
+    const dados = {
+      id: l.id,
+      descricao: l.descricao,
+      observacoes: l.observacoes,
+      categoria: l.categoria,
+      conta: l.conta,
+      iconeCat: getCatIcon(l.categoria),
+      isSelected,
+      cor,
+      valF,
+      clsValor,
+      prefixoValor,
+      dC,
+      dP,
+      iconePago,
+      iconeCreditoTabela,
+      badgeCreditoCard,
+      opacityClass: isFuturo ? 'opacity-80' : '',
+      textClassDesc: isFuturo ? 'text-suave' : 'text-principal'
+    };
 
-    // 1. Gera a Linha da Tabela (Desktop)
-    const htmlLinha = `
-      <tr id="row-${l.id}" class="${isSelected ? 'linha-selecionada' : ''} ${opacityClass}">
-        <td class="text-center" style="width: 32px;">
-          <input type="checkbox" class="chk-lote cursor-pointer m-0" data-id="${l.id}" onchange="alternarSelecaoLote('${l.id}', this.checked)" ${isSelected ? 'checked' : ''} style="width: 16px; height: 16px;">
-        </td>
-        <td class="text-sm whitespace-nowrap">${dC}</td>
-        <td class="text-sm whitespace-nowrap">${dP}</td>
-        <td>
-          <div class="flex items-center gap-1">
-            ${iconePago} 
-            <strong style="color:var(--${isFuturo ? 'texto-suave' : 'texto-principal'});">${l.descricao}</strong>
-            ${iconeCreditoTabela}
-          </div>
-        </td>
-        <td><div class="text-sm text-suave italic max-w-sm" style="line-height: 1.3;">${l.observacoes || '—'}</div></td>
-        <td>
-          <span class="inline-flex items-center gap-1 bg-principal p-1 rounded text-sm whitespace-nowrap">
-            <span class="material-icons text-suave" style="font-size: 1.1rem;">${getCatIcon(l.categoria)}</span>
-            <span style="line-height: 1;">${l.categoria}</span>
-          </span>
-        </td>
-        <td>
-          <span class="inline-flex items-center gap-1 whitespace-nowrap text-sm">
-            <span class="bolinha-cor" style="background:${cor};"></span>
-            <span style="line-height: 1;">${l.conta}</span>
-          </span>
-        </td>
-        <td class="text-right whitespace-nowrap font-bold ${clsValor}">${prefixoValor}${valF}</td>
-        <td class="text-center">
-          <div class="flex items-center justify-center gap-1">
-            <button onclick="prepararCopia('${l.id}')" class="btn-icone p-1 text-suave" title="Duplicar"><i class="material-icons text-base">content_copy</i></button>
-            <button onclick="prepararEdicao('${l.id}')" class="btn-icone p-1 icone-edit" title="Editar"><i class="material-icons text-base">edit</i></button>
-            <button onclick="confirmarExclusao('${l.id}')" class="btn-icone p-1 icone-delete" title="Excluir"><i class="material-icons text-base">delete</i></button>
-          </div>
-        </td>
-      </tr>`;
-
-    // 2. Gera o Card (Mobile) blindado com a nova classe
-    const htmlCard = `
-      <div id="card-${l.id}" class="card-lancamento ${isSelected ? 'card-selecionado' : ''} ${opacityClass}" style="border-left: 4px solid ${cor};" onmousedown="iniciarToqueLongo(event, '${l.id}')" onmouseup="cancelarToqueLongo()" onmouseleave="cancelarToqueLongo()" ontouchstart="iniciarToqueLongo(event, '${l.id}')" ontouchend="cancelarToqueLongo()" onclick="cliqueCard(event, '${l.id}')">
-        <input type="checkbox" class="chk-lote hidden" data-id="${l.id}" onchange="alternarSelecaoLote('${l.id}', this.checked)" ${isSelected ? 'checked' : ''}>
-        
-        <div class="flex justify-between items-center mb-2">
-          <div class="text-xs text-suave font-medium flex gap-2 shrink-0"><span>C: ${dC}</span><span>•</span><span>P: ${dP}</span></div>
-          <div class="flex gap-1 shrink-0">
-            <button onclick="prepararCopia('${l.id}')" class="btn-icone btn-mini text-suave" title="Duplicar"><span class="material-icons text-lg">content_copy</span></button>
-            <button onclick="prepararEdicao('${l.id}')" class="btn-icone btn-mini icone-edit" title="Editar"><span class="material-icons text-lg">edit</span></button>
-            <button onclick="confirmarExclusao('${l.id}')" class="btn-icone btn-mini icone-delete" title="Excluir"><span class="material-icons text-lg">delete</span></button>
-          </div>
-        </div>
-        
-        <div class="text-base font-bold ${textClassDesc} flex items-start gap-2 mb-2 line-clamp-2" style="line-height:1.2;">
-          ${iconePago}
-          <span style="flex: 1;">${l.descricao}</span>
-          ${badgeCreditoCard}
-        </div>
-        
-        ${l.observacoes ? `<div class="text-xs text-suave bg-principal p-1 rounded mb-2 truncate italic">Obs: ${l.observacoes}</div>` : ''}
-        
-        <div class="card-lancamento-footer">
-          <div class="flex-col flex-1 gap-1 min-w-0">
-            <span class="text-xs text-suave flex items-center gap-1 truncate"><span class="material-icons text-sm shrink-0">${getCatIcon(l.categoria)}</span><span class="truncate">${l.categoria}</span></span>
-            <span class="text-xs text-suave flex items-center gap-1 truncate"><span class="bolinha-cor shrink-0" style="background:${cor};"></span><span class="truncate">${l.conta}</span></span>
-          </div>
-          <div class="text-lg font-bold shrink-0 text-right ${clsValor}">${prefixoValor}${valF}</div>
-        </div>
-      </div>`;
-
-    return { linha: htmlLinha, card: htmlCard };
+    return {
+      linha: renderizarLinhaTabelaLancamento(dados),
+      card: renderizarCardMobileLancamento(dados)
+    };
   }
 
   function renderizarTelaLancamentos() {
@@ -2047,16 +2070,16 @@
     if(chkAll) chkAll.checked = false;
 
     if(tot === 0) { 
-      tb.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:50px 20px; background:var(--bg-principal);">
-        <span class="material-icons" style="font-size:3rem; color:var(--borda); margin-bottom:10px;">inbox</span>
-        <h4 style="margin:0; color:var(--texto-principal); font-size:1.1rem;">Nenhum lançamento encontrado</h4>
-        <p style="margin:5px 0 0 0; color:var(--texto-suave); font-size:0.9rem;">Tente ajustar os filtros ou crie um novo registro.</p>
-      </td></tr>`; 
+      tb.innerHTML = `<tr><td colspan="10" class="p-0"><div class="estado-vazio">
+        <span class="material-icons estado-vazio-icon">inbox</span>
+        <h4 class="estado-vazio-titulo">Nenhum lançamento encontrado</h4>
+        <p class="estado-vazio-texto">Tente ajustar os filtros ou crie um novo registro.</p>
+      </div></td></tr>`; 
       
-      dc.innerHTML = `<div style="text-align:center; padding:40px 20px; background:var(--bg-card); border-radius:8px; border:1px dashed var(--borda);">
-        <span class="material-icons" style="font-size:3rem; color:var(--borda); margin-bottom:10px;">inbox</span>
-        <h4 style="margin:0; color:var(--texto-principal); font-size:1.1rem;">Lista vazia</h4>
-        <p style="margin:5px 0 0 0; color:var(--texto-suave); font-size:0.9rem;">Ajuste os filtros acima.</p>
+      dc.innerHTML = `<div class="estado-vazio-card">
+        <span class="material-icons estado-vazio-icon">inbox</span>
+        <h4 class="estado-vazio-titulo">Lista vazia</h4>
+        <p class="estado-vazio-texto">Ajuste os filtros acima.</p>
       </div>`; 
       
       document.getElementById('pInfo').innerHTML = '0 de 0'; 
@@ -2109,7 +2132,7 @@
     if (sumDespesas === 0 && sumReceitas === 0) {
         htmlBadgesFuturos = `
         <div id="txtHintFuturos">
-            <span class="material-icons" style="font-size: 1rem;">info</span> 
+            <span class="material-icons text-base">info</span> 
             Ative "Somar Crédito" para calcular lançamentos no crédito.
         </div>`;
     } else {
@@ -2161,7 +2184,7 @@
     };
 
     // Ícones em vez de texto!
-    addBtn('<span class="material-icons text-destaque" style="font-size:1.2rem; margin:0;">chevron_left</span>', paginaAtual - 1, false, paginaAtual === 1);
+    addBtn('<span class="material-icons text-destaque icon-sm m-0">chevron_left</span>', paginaAtual - 1, false, paginaAtual === 1);
 
     let startPage = Math.max(1, paginaAtual - 2); let endPage = Math.min(tP, paginaAtual + 2);
     if (paginaAtual <= 3) { endPage = Math.min(5, tP); }
@@ -2172,7 +2195,7 @@
     if (endPage < tP) { if (endPage < tP - 1) addBtn('...', null, false, true); addBtn(tP, tP); }
     
     // Ícones em vez de texto!
-    addBtn('<span class="material-icons text-destaque" style="font-size:1.2rem; margin:0;">chevron_right</span>', paginaAtual + 1, false, paginaAtual === tP);
+    addBtn('<span class="material-icons text-destaque icon-sm m-0">chevron_right</span>', paginaAtual + 1, false, paginaAtual === tP);
   }
 
   function mudarLimitePagina(valor) {
@@ -2513,7 +2536,7 @@
   function confirmarExclusaoLote() {
     const qtd = itensSelecionadosLote.size;
     const b = document.getElementById('confirmModalBody');
-    b.innerHTML = `Excluir definitivamente os <strong>${qtd}</strong> lançamentos selecionados?<br><br><span style="color:var(--cor-perigo); font-weight:bold;">⚠️ Essa ação não pode ser desfeita.</span>`;
+    b.innerHTML = `Excluir definitivamente os <strong>${qtd}</strong> lançamentos selecionados?<br><br><span class="text-perigo font-bold">⚠️ Essa ação não pode ser desfeita.</span>`;
     
     abrirJanela('confirmModal');
     
@@ -2991,11 +3014,11 @@
           <div class="fluxo-tooltip">
             <div class="font-bold text-sm text-center pb-1 mb-1">${labelHover}</div>
             <div class="flex justify-between items-center gap-3">
-              <span class="text-sucesso font-bold flex items-center text-xs"><span class="material-icons" style="font-size: 0.9rem;">arrow_upward</span> Rec:</span>
+              <span class="text-sucesso font-bold flex items-center text-xs"><span class="material-icons text-sm">arrow_upward</span> Rec:</span>
               <span class="text-principal font-bold text-xs">${dados.rec.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
             </div>
             <div class="flex justify-between items-center gap-3">
-              <span class="text-perigo font-bold flex items-center text-xs"><span class="material-icons" style="font-size: 0.9rem;">arrow_downward</span> Desp:</span>
+              <span class="text-perigo font-bold flex items-center text-xs"><span class="material-icons text-sm">arrow_downward</span> Desp:</span>
               <span class="text-principal font-bold text-xs">${dados.desp.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
             </div>
           </div>
@@ -3086,7 +3109,7 @@
     if (pendentes.length === 0 && htmlFinal === '') {
       lista.innerHTML = `
         <div class="flex flex-col items-center justify-center p-5 text-center">
-          <span class="material-icons text-sucesso mb-2" style="font-size: 2.5rem;">task_alt</span>
+          <span class="material-icons text-sucesso mb-2 icon-xl">task_alt</span>
           <h4 class="m-0 text-principal text-lg">Tudo em dia!</h4>
           <p class="m-0 mt-1 text-suave text-sm">Nenhuma pendência para os próximos 30 dias.</p>
         </div>`;
@@ -3095,11 +3118,11 @@
 
     pendentes.forEach(l => {
       const dp = l.data_pag.split('T')[0];
-      let corClasse = 'noti-bg-futura'; let statusTxt = 'No radar'; let corIcone = 'var(--cor-destaque)';
+      let corClasse = 'noti-bg-futura'; let statusTxt = 'No radar'; let clsCor = 'text-destaque';
 
-      if (dp < hojeStr) { corClasse = 'noti-bg-urgente'; statusTxt = 'Atrasada'; corIcone = 'var(--cor-perigo)'; } 
-      else if (dp === hojeStr) { corClasse = 'noti-bg-urgente'; statusTxt = 'Vence Hoje'; corIcone = 'var(--cor-perigo)'; } 
-      else if (dp <= new Date(hojeTime + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) { corClasse = 'noti-bg-atencao'; statusTxt = 'Próxima'; corIcone = 'var(--cor-aviso)'; }
+      if (dp < hojeStr) { corClasse = 'noti-bg-urgente'; statusTxt = 'Atrasada'; clsCor = 'text-perigo'; } 
+      else if (dp === hojeStr) { corClasse = 'noti-bg-urgente'; statusTxt = 'Vence Hoje'; clsCor = 'text-perigo'; } 
+      else if (dp <= new Date(hojeTime + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) { corClasse = 'noti-bg-atencao'; statusTxt = 'Próxima'; clsCor = 'text-aviso'; }
 
       const pts = dp.split('-'); const dataFormatada = `${pts[2]}/${pts[1]}`;
       
@@ -3111,7 +3134,7 @@
           <div class="flex flex-col gap-1 overflow-hidden flex-1">
             <strong class="text-principal text-base truncate">${nomeExibicao}</strong>
             <div class="text-xs text-suave flex items-center gap-1">
-              <span style="color:${corIcone};" class="font-bold">${statusTxt}</span>
+              <span class="font-bold ${clsCor}">${statusTxt}</span>
               <span>• Venc: ${dataFormatada}</span>
             </div>
           </div>
@@ -3161,13 +3184,13 @@
 
           htmlSaldos += `
             <div class="carousel-card">
-              <div class="p-4 bg-principal border-b flex flex-col items-center justify-center text-center relative overflow-hidden shrink-0" style="border-color: var(--borda);">
-                <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 90px; right: -15px; top: -15px; color: var(--texto-principal);">${iconeWatermark}</span>
+              <div class="carousel-card-header">
+                <span class="material-icons card-watermark-top">${iconeWatermark}</span>
                 <span class="text-xs font-bold text-suave uppercase tracking-wider z-10">${tipo}</span>
                 <span class="text-2xl font-bold ${grupo.totalEfetivo >= 0 ? 'text-sucesso' : 'text-perigo'} mt-1 z-10" title="Saldo Efetivo">${grupo.totalEfetivo.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                 <span class="text-xs text-suave mt-1 z-10">Projetado: <strong class="text-principal">${grupo.totalProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</strong></span>
               </div>
-              <div class="flex flex-col p-2 gap-1 scroll-y-elegante" style="flex: 1;">`;
+              <div class="flex flex-col p-2 gap-1 scroll-y-elegante flex-1">`;
           
           grupo.itens.sort((a,b) => b.saldoEfetivo - a.saldoEfetivo).forEach(item => {
             const perc = Math.min(100, Math.max(0, (Math.abs(item.saldoEfetivo) / totalParaProporcao) * 100));
@@ -3180,11 +3203,11 @@
                     </div>
                     <div class="flex flex-col items-end shrink-0">
                       <span class="text-sm font-bold ${item.saldoEfetivo >= 0 ? 'text-principal' : 'text-perigo'}">${item.saldoEfetivo.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
-                      <span class="text-xs text-suave" style="font-size: 0.65rem;">Proj: ${item.saldoProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
+                      <span class="text-2xs text-suave">Proj: ${item.saldoProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                     </div>
                   </div>
-                  <div class="w-full bg-principal rounded-full h-1 mt-1 overflow-hidden" style="background: var(--borda);">
-                    <div class="h-full rounded-full opacity-80" style="width: ${perc}%; background: ${item.cor};"></div>
+                  <div class="progress-track mt-1">
+                    <div class="progress-fill" style="width: ${perc}%; background: ${item.cor};"></div>
                   </div>
                 </div>`;
           });
@@ -3196,17 +3219,17 @@
       
       htmlSaldos += `
         <div class="carousel-card justify-center items-center p-5 bg-principal gap-6">
-          <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 140px; left: -20px; bottom: -20px; color: var(--texto-principal);">query_stats</span>
+          <span class="material-icons card-watermark-lg">query_stats</span>
           
           <div class="flex flex-col items-center z-10 w-full">
-            <span class="material-icons text-suave mb-1" style="font-size: 1.8rem;">account_balance_wallet</span>
+            <span class="material-icons text-suave mb-1 icon-lg">account_balance_wallet</span>
             <div class="text-suave text-xs font-bold uppercase tracking-wider text-center">Saldo Anual Efetivo</div>
             <div class="${balPeriodoEfetivo >= 0 ? 'text-sucesso' : 'text-perigo'} text-xl font-bold mt-1 text-center">${balPeriodoEfetivo.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</div>
             <div class="text-xs text-suave mt-1">Proj: <strong class="text-principal">${balPeriodoProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</strong></div>
           </div>
           
           <div class="flex flex-col items-center z-10 w-full">
-            <span class="material-icons text-suave mb-1" style="font-size: 1.8rem;">insights</span>
+            <span class="material-icons text-suave mb-1 icon-lg">insights</span>
             <div class="text-suave text-xs font-bold uppercase tracking-wider text-center">Média Efetiva</div>
             <div class="${mediaMensal >= 0 ? 'text-sucesso' : 'text-perigo'} text-xl font-bold mt-1 text-center">${mediaMensal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</div>
             <div class="text-xs text-suave mt-1">por mês</div>
@@ -3219,13 +3242,13 @@
           const totalParaProporcao = Math.abs(dadosMes.totalEfetivo) || 1;
           htmlSaldos += `
             <div class="carousel-card">
-              <div class="p-4 bg-principal border-b flex flex-col items-center justify-center text-center relative overflow-hidden shrink-0" style="border-color: var(--borda);">
-                <span class="material-icons absolute opacity-5 pointer-events-none" style="font-size: 90px; right: -15px; top: -15px; color: var(--texto-principal);">event</span>
+              <div class="carousel-card-header">
+                <span class="material-icons card-watermark-top">event</span>
                 <span class="text-xs font-bold text-suave uppercase tracking-wider z-10">${NOME_MESES[mes]}</span>
                 <span class="text-2xl font-bold ${dadosMes.totalEfetivo >= 0 ? 'text-sucesso' : 'text-perigo'} mt-1 z-10">${dadosMes.totalEfetivo.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                 <span class="text-xs text-suave mt-1 z-10">Proj: <strong class="text-principal">${dadosMes.totalProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</strong></span>
               </div>
-              <div class="flex flex-col p-2 gap-1 scroll-y-elegante" style="flex: 1;">`;
+              <div class="flex flex-col p-2 gap-1 scroll-y-elegante flex-1">`;
               
           Object.keys(dadosMes.contas).map(k => ({nome: k, ...dadosMes.contas[k]})).sort((a,b) => b.valorEfetivo - a.valorEfetivo).forEach(c => {
             const perc = Math.min(100, Math.max(0, (Math.abs(c.valorEfetivo) / totalParaProporcao) * 100));
@@ -3238,11 +3261,11 @@
                     </div>
                     <div class="flex flex-col items-end shrink-0">
                       <span class="text-sm font-bold ${c.valorEfetivo >= 0 ? 'text-principal' : 'text-perigo'}">${c.valorEfetivo.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
-                      <span class="text-xs text-suave" style="font-size: 0.65rem;">Proj: ${c.valorProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
+                      <span class="text-2xs text-suave">Proj: ${c.valorProj.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                     </div>
                   </div>
-                  <div class="w-full bg-principal rounded-full h-1 mt-1 overflow-hidden" style="background: var(--borda);">
-                    <div class="h-full rounded-full opacity-80" style="width: ${perc}%; background: ${c.cor};"></div>
+                  <div class="progress-track mt-1">
+                    <div class="progress-fill" style="width: ${perc}%; background: ${c.cor};"></div>
                   </div>
                 </div>`;
           });
@@ -3298,15 +3321,15 @@
 
       function gerarSeloFatura(gasto, pago, anoFiltroNum, mesFiltroNum, diaFechamento) {
           if (gasto <= 0.05 && pago <= 0.05) return '';
-          if (pago >= (gasto - 0.05)) return '<span class="badge-selo" style="background:rgba(46, 204, 113, 0.15); color:var(--cor-sucesso);">PAGA</span>';
+          if (pago >= (gasto - 0.05)) return '<span class="badge-selo selo-paga">PAGA</span>';
           const hoje = new Date(); const anoAtual = hoje.getFullYear(); const mesAtual = hoje.getMonth() + 1; const diaAtual = hoje.getDate();
-          if (anoFiltroNum < anoAtual || (anoFiltroNum === anoAtual && mesFiltroNum < mesAtual)) return '<span class="badge-selo" style="background:rgba(231, 76, 60, 0.15); color:var(--cor-perigo);">ATRASADA</span>';
+          if (anoFiltroNum < anoAtual || (anoFiltroNum === anoAtual && mesFiltroNum < mesAtual)) return '<span class="badge-selo selo-atrasada">ATRASADA</span>';
           if (anoFiltroNum === anoAtual && mesFiltroNum === mesAtual) {
-              if (diaFechamento && diaAtual > diaFechamento) return '<span class="badge-selo" style="background:rgba(243, 156, 18, 0.15); color:var(--cor-aviso);">FECHADA</span>';
-              return '<span class="badge-selo" style="background:rgba(52, 152, 219, 0.15); color:var(--cor-destaque);">ABERTA</span>';
+              if (diaFechamento && diaAtual > diaFechamento) return '<span class="badge-selo selo-fechada">FECHADA</span>';
+              return '<span class="badge-selo selo-aberta">ABERTA</span>';
           }
-          if (anoFiltroNum === anoAtual && mesFiltroNum === mesAtual + 1) return '<span class="badge-selo" style="background:rgba(52, 152, 219, 0.15); color:var(--cor-destaque);">ABERTA</span>';
-          return '<span class="badge-selo" style="background:rgba(149, 165, 166, 0.15); color:var(--texto-suave);"><i class="material-icons" style="font-size:0.75rem;">event</i> FUTURA</span>';
+          if (anoFiltroNum === anoAtual && mesFiltroNum === mesAtual + 1) return '<span class="badge-selo selo-aberta">ABERTA</span>';
+          return '<span class="badge-selo selo-futura"><i class="material-icons text-xs">event</i> FUTURA</span>';
       }
 
       const listaCredito = document.getElementById('dashListaCredito');
@@ -3345,9 +3368,9 @@
               let dtFech = (c.fechamento > c.vencimento) ? new Date(anoA, mesA - 2, c.fechamento) : new Date(anoA, mesA - 1, c.fechamento);
               const fechStr = `${dtFech.getFullYear()}-${String(dtFech.getMonth()+1).padStart(2,'0')}-${String(dtFech.getDate()).padStart(2,'0')}`;
 
-              if (hojeYMD > c.vencimentoStr) { c.status = 'ATRASADA'; c.corSelo = 'var(--cor-perigo)'; c.bgSelo = 'rgba(231,76,60,0.15)'; }
-              else if (hojeYMD > fechStr) { c.status = 'FECHADA'; c.corSelo = 'var(--cor-aviso)'; c.bgSelo = 'rgba(243,156,18,0.15)'; }
-              else { c.status = 'ABERTA'; c.corSelo = 'var(--cor-destaque)'; c.bgSelo = 'rgba(52,152,219,0.15)'; }
+              if (hojeYMD > c.vencimentoStr) { c.status = 'ATRASADA'; c.clsSelo = 'selo-atrasada'; }
+              else if (hojeYMD > fechStr) { c.status = 'FECHADA'; c.clsSelo = 'selo-fechada'; }
+              else { c.status = 'ABERTA'; c.clsSelo = 'selo-aberta'; }
 
               c.gastoFuturo = 0;
               mesesOrdenados.forEach(m => { if (m > mesAtivo) c.gastoFuturo += Math.max(0, c.meses[m].gasto - c.meses[m].pago); });
@@ -3374,16 +3397,16 @@
                   else if (c.status === 'ABERTA') { qtdAberta++; vencAberta = updateMinDate(vencAberta, c.vencimentoStr); }
               });
 
-              const formatarResumo = (qtd, txt, dataIso, cor) => {
+              const formatarResumo = (qtd, txt, dataIso, clsCor) => {
                   if (qtd === 0) return '';
                   const dIso = new Date(dataIso + 'T00:00:00'); const dHj = new Date(hojeYMD + 'T00:00:00');
                   const diff = Math.ceil((dIso.getTime() - dHj.getTime()) / 86400000);
                   const txtTempo = diff < 0 ? `há ${Math.abs(diff)} dia(s)` : (diff === 0 ? 'hoje' : `em ${diff} dia(s)`);
                   const dtF = `${String(dIso.getDate()).padStart(2,'0')}/${String(dIso.getMonth()+1).padStart(2,'0')}`;
-                  return `<div class="mb-1 text-sm text-suave"><strong style="color: ${cor};">${qtd} fatura(s) ${txt}</strong> | Venc. ${txtTempo} (${dtF})</div>`;
+                  return `<div class="mb-1 text-sm text-suave"><strong class="${clsCor}">${qtd} fatura(s) ${txt}</strong> | Venc. ${txtTempo} (${dtF})</div>`;
               };
 
-              let htmlResumoCol1 = formatarResumo(qtdAtrasada, 'atrasada(s)', vencAtrasada, 'var(--cor-perigo)') + formatarResumo(qtdFechada, 'fechada(s)', vencFechada, 'var(--cor-aviso)') + formatarResumo(qtdAberta, 'aberta(s)', vencAberta, 'var(--cor-destaque)');
+              let htmlResumoCol1 = formatarResumo(qtdAtrasada, 'atrasada(s)', vencAtrasada, 'text-perigo') + formatarResumo(qtdFechada, 'fechada(s)', vencFechada, 'text-aviso') + formatarResumo(qtdAberta, 'aberta(s)', vencAberta, 'text-destaque');
               if (!htmlResumoCol1) htmlResumoCol1 = '<div class="text-sucesso font-bold text-sm py-2 flex items-center gap-1"><span class="material-icons text-base">check_circle</span> Nenhuma fatura pendente</div>';
 
               htmlCredito += `
@@ -3420,10 +3443,10 @@
                           <div class="card-header">
                               <div class="credito-nome-selo">
                                   <strong class="card-titulo">
-                                      <span style="width:10px; height:10px; border-radius:50%; background:${c.cor}; flex-shrink:0;"></span><span>${nome}</span>
+                                      <span class="bolinha-cor shrink-0" style="background:${c.cor};"></span><span>${nome}</span>
                                   </strong>
                                   <div class="credito-selo-vencimento flex items-center gap-2">
-                                    <span class="badge-selo" style="background:${c.bgSelo}; color:${c.corSelo};">${c.status}</span>
+                                    <span class="badge-selo ${c.clsSelo}">${c.status}</span>
                                     <span class="text-xs text-suave">(Venc. ${c.vencimentoFormatado})</span>
                                   </div>
                               </div>
@@ -3434,8 +3457,8 @@
                           </div>
                           <div class="flex items-center gap-2 mb-2">
                               <div class="flex-1 flex-col gap-1">
-                                  <div class="w-full h-1 bg-principal rounded-full overflow-hidden"><div style="width: ${pA}%; height:100%; background: ${c.cor};"></div></div>
-                                  <div class="w-full h-1 bg-principal rounded-full overflow-hidden"><div style="width: ${pF}%; height:100%; background: var(--texto-suave); opacity: 0.5;"></div></div>
+                                  <div class="progress-track"><div class="progress-fill" style="width: ${pA}%; background: ${c.cor};"></div></div>
+                                  <div class="progress-track"><div class="progress-fill-futura" style="width: ${pF}%;"></div></div>
                               </div>
                               <span class="text-xs font-bold text-suave min-w-[40px] text-right">${pA.toFixed(1)}%</span>
                           </div>
@@ -3569,7 +3592,7 @@
                           <div class="card-header">
                               <div class="credito-nome-selo">
                                   <strong class="card-titulo">
-                                      <span style="width:10px; height:10px; border-radius:50%; background:${c.cor}; flex-shrink:0;"></span><span>${nome}</span>
+                                      <span class="bolinha-cor shrink-0" style="background:${c.cor};"></span><span>${nome}</span>
                                   </strong>
                                   ${selo}
                               </div>
@@ -3580,8 +3603,8 @@
                           </div>
                           <div class="flex items-center gap-2 mb-2">
                               <div class="flex-1 flex-col gap-1">
-                                  <div class="w-full h-1 bg-principal rounded-full overflow-hidden"><div style="width: ${pA}%; height:100%; background: ${c.cor};"></div></div>
-                                  <div class="w-full h-1 bg-principal rounded-full overflow-hidden"><div style="width: ${pF}%; height:100%; background: var(--texto-suave); opacity: 0.5;"></div></div>
+                                  <div class="progress-track"><div class="progress-fill" style="width: ${pA}%; background: ${c.cor};"></div></div>
+                                  <div class="progress-track"><div class="progress-fill-futura" style="width: ${pF}%;"></div></div>
                               </div>
                               <span class="text-xs font-bold text-suave min-w-[40px] text-right">${pA.toFixed(1)}%</span>
                           </div>
@@ -3724,20 +3747,20 @@
     if (paginaLegendaAtual > totalPaginas) paginaLegendaAtual = totalPaginas;
     const inicioSlice = (paginaLegendaAtual - 1) * ITENS_POR_PAGINA_LEGENDA;
     
-    let legendHtml = '<div style="width: 100%; margin-top: 10px;">';
+    let legendHtml = '<div class="w-full mt-2">';
 
     arrayGrupos.forEach((g, idx) => {
         const perc = (g.valor / totalDespesasGrafico) * 100;
         const cor = paletaCores[idx % paletaCores.length];
         
         // Aumentamos o stroke-width para 10 (fechando o buraco) e alteramos o cx/cy para 21
-        svgSlices += `<circle r="15.9155" cx="21" cy="21" fill="transparent" stroke="${cor}" stroke-width="10" stroke-dasharray="${perc} ${100 - perc}" stroke-dashoffset="${-cumulativePercent}" style="transition: all 0.3s ease; cursor:pointer;" onmouseover="interagirDonut(this, '${g.nome}', '${g.valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}', '${perc.toFixed(1)}%')" onmouseout="resetarDonut(this)"></circle>`;
+        svgSlices += `<circle r="15.9155" cx="21" cy="21" fill="transparent" stroke="${cor}" stroke-width="10" stroke-dasharray="${perc} ${100 - perc}" stroke-dashoffset="${-cumulativePercent}" class="donut-slice" onmouseover="interagirDonut(this, '${g.nome}', '${g.valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}', '${perc.toFixed(1)}%')" onmouseout="resetarDonut(this)"></circle>`;
         cumulativePercent += perc;
         
         if (idx >= inicioSlice && idx < inicioSlice + ITENS_POR_PAGINA_LEGENDA) {
             const iconeG = agrupamentoDashboard === 'categoria' ? getCatIcon(g.nome) : 'local_offer';
             
-            legendHtml += `<div class="flex justify-between items-center py-2" style="border-bottom: 1px dashed var(--borda);">
+            legendHtml += `<div class="flex justify-between items-center py-2 border-b-dashed">
                              <span class="flex items-center gap-2 text-sm text-principal">
                                <span class="bolinha-cor shrink-0" style="background:${cor};"></span>
                                <span class="material-icons text-suave text-base">${iconeG}</span>
@@ -3753,24 +3776,24 @@
     
     if (totalPaginas > 1) {
         legendHtml += `<div class="flex justify-between items-center mt-2 text-sm">
-                         <button class="btn-visao" onclick="mudarPaginaLegenda(-1)" ${paginaLegendaAtual === 1 ? 'disabled style="opacity:0.5;"' : ''}>&laquo; Anterior</button>
+                         <button class="btn-visao" onclick="mudarPaginaLegenda(-1)" ${paginaLegendaAtual === 1 ? 'disabled' : ''}>&laquo; Anterior</button>
                          <span class="text-suave">Pág ${paginaLegendaAtual} de ${totalPaginas}</span>
-                         <button class="btn-visao" onclick="mudarPaginaLegenda(1)" ${paginaLegendaAtual === totalPaginas ? 'disabled style="opacity:0.5;"' : ''}>Próxima &raquo;</button>
+                         <button class="btn-visao" onclick="mudarPaginaLegenda(1)" ${paginaLegendaAtual === totalPaginas ? 'disabled' : ''}>Próxima &raquo;</button>
                        </div>`;
     }
     legendHtml += '</div>';
 
     boxGrafico.innerHTML = `
       <div class="flex items-center justify-center gap-6 w-full mt-2 mb-3">
-        <div style="width: 110px; height: 110px; position: relative; flex-shrink: 0;">
-          <svg viewBox="0 0 42 42" style="width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible;">
+        <div class="donut-box">
+          <svg viewBox="0 0 42 42" class="donut-svg">
             <circle r="15.9155" cx="21" cy="21" fill="transparent" stroke="var(--bg-principal)" stroke-width="10"></circle>
             ${svgSlices}
           </svg>
         </div>
-        <div class="flex flex-col justify-center" id="donutInfoText" style="width: 150px; flex-shrink: 0;">
+        <div class="donut-info" id="donutInfoText">
            <span class="text-xs text-suave font-bold uppercase tracking-wider">Total</span>
-           <strong class="text-2xl text-principal font-bold mt-1" style="line-height: 1;">${totalDespesasGrafico.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</strong>
+           <strong class="text-2xl text-principal font-bold mt-1 leading-none">${totalDespesasGrafico.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</strong>
         </div>
       </div>
       ${legendHtml}
@@ -3785,7 +3808,7 @@
     // Texto blindado no container de 150px para não empurrar o gráfico
     info.innerHTML = `
        <span class="text-xs text-suave font-bold uppercase tracking-wider truncate block w-full" title="${titulo}">${perc} - ${titulo}</span>
-       <strong class="text-xl text-destaque font-bold mt-1 block w-full truncate" style="line-height: 1;">${valor}</strong>
+       <strong class="text-xl text-destaque font-bold mt-1 block w-full truncate leading-none">${valor}</strong>
     `;
   }
   
@@ -3828,12 +3851,12 @@
 
       top5Itens.forEach(l => {
           const dataF = l.data_compra ? new Date(l.data_compra).toLocaleDateString('pt-BR', {timeZone:'UTC'}).substring(0,5) : '';
-          const iconeCredito = (l.no_credito === true || l.no_credito === 'SIM' || String(l.no_credito).toUpperCase() === 'TRUE') ? `<span class="material-icons text-perigo" style="font-size:0.8rem;" title="Crédito">credit_card</span>` : '';
+          const iconeCredito = (l.no_credito === true || l.no_credito === 'SIM' || String(l.no_credito).toUpperCase() === 'TRUE') ? `<span class="material-icons text-perigo text-xs" title="Crédito">credit_card</span>` : '';
           
-          htmlItens += `<div class="cat-item p-2" style="border-bottom: 1px dashed var(--borda);">
+          htmlItens += `<div class="cat-item p-2 border-b-dashed">
                           <div class="flex flex-col overflow-hidden">
                             <strong class="text-principal text-xs flex items-center gap-1">${l.descricao} ${iconeCredito}</strong>
-                            <span class="text-suave text-xs" style="font-size:0.65rem;">${dataF} • ${l.conta || 'Sem conta'}</span>
+                            <span class="text-suave text-2xs">${dataF} • ${l.conta || 'Sem conta'}</span>
                           </div>
                           <span class="text-suave text-sm">${Math.abs(l.valor).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                         </div>`;
@@ -3846,17 +3869,17 @@
                         </div>`;
       }
 
-      let mC = index === 0 ? 'background:#f1c40f; color:#8a6d00;' : (index === 1 ? 'background:#bdc3c7; color:#444;' : (index === 2 ? 'background:#cd7f32; color:#fff;' : 'background:var(--cor-destaque); color:#fff;'));
+      const clsRank = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : 'rank-default'));
       
       htmlTop5 += `<details class="cat-group tema-neutro" ontoggle="const ic = this.querySelector('.icone-expansao'); if(ic) ic.innerText = this.open ? 'expand_less' : 'expand_more';">
                      <summary class="cat-summary py-2 px-3">
                        <div class="flex items-center gap-2">
                          <span class="material-icons icone-expansao text-suave text-base">expand_more</span>
-                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:0.65rem; font-weight:bold; ${mC}">${index + 1}</div>
+                         <div class="rank-badge ${clsRank}">${index + 1}</div>
                          <span class="material-icons text-suave text-base">${getCatIcon(cat.nome)}</span>
                          <span class="text-sm font-bold text-principal">${cat.nome}</span>
                        </div>
-                       <span style="color:${fluxoRanking === 'DESPESA' ? 'var(--cor-perigo)' : 'var(--cor-sucesso)'}; font-weight:bold; font-size:0.85rem;">${cat.total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
+                       <span class="font-bold text-sm ${fluxoRanking === 'DESPESA' ? 'text-perigo' : 'text-sucesso'}">${cat.total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
                      </summary>
                      <div class="cat-content bg-principal">${htmlItens}</div>
                    </details>`;
@@ -3923,14 +3946,14 @@
     let tbodyHtml = '';
     const tiposOrdenados = Object.keys(dadosPivot).sort((a, b) => { if (a.toLowerCase().includes('receita') || a.toLowerCase().includes('retorno')) return -1; if (b.toLowerCase().includes('receita') || b.toLowerCase().includes('retorno')) return 1; return a.localeCompare(b); });
     
-    const formatarMoeda = (v) => v === 0 ? '<span style="color:var(--borda); font-weight:normal;">-</span>' : v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    const formatarMoeda = (v) => v === 0 ? '<span class="pivot-zero">-</span>' : v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
     const classeCor = (v, isReceita) => { if (v === 0) return ''; return isReceita ? 'text-sucesso font-bold' : 'text-perigo font-bold'; };
     
     tiposOrdenados.forEach(tipo => {
       const objTipo = dadosPivot[tipo]; const isReceita = tipo.toLowerCase().includes('receita') || tipo.toLowerCase().includes('retorno');
       const cats = Object.keys(objTipo.categorias).sort((a, b) => a.localeCompare(b));
       cats.forEach(cat => {
-          let htmlLinha = `<tr><th class="col-fixa"><div class="flex items-center gap-1"><span class="material-icons text-suave" style="font-size:1rem;">${getCatIcon(cat)}</span><span>${cat}</span></div></th>`;
+          let htmlLinha = `<tr><th class="col-fixa"><div class="flex items-center gap-1"><span class="material-icons text-suave text-base">${getCatIcon(cat)}</span><span>${cat}</span></div></th>`;
           let somaCat = 0; let mesesAtivos = 0; 
           for(let i=1; i<=12; i++) { const m = String(i).padStart(2, '0'); const v = objTipo.categorias[cat][m]; if (v > 0) mesesAtivos++; somaCat += v; htmlLinha += `<td class="col-mes text-right ${classeCor(v, isReceita)}">${formatarMoeda(v)}</td>`; }
           const mediaUso = mesesAtivos > 0 ? somaCat / mesesAtivos : 0;
@@ -3958,7 +3981,7 @@
         somaTotalRec += r; somaTotalDesp += d; somaTotalBal += b;
         htmlTotalRec += `<th class="col-mes text-right">${formatarMoeda(r)}</th>`; 
         htmlTotalDesp += `<th class="col-mes text-right">${formatarMoeda(d)}</th>`; 
-        htmlBalanco += `<th class="col-mes text-right">${b === 0 ? '<span style="color:rgba(255,255,255,0.4);">-</span>' : b.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</th>`;
+        htmlBalanco += `<th class="col-mes text-right">${b === 0 ? '<span class="opacity-40">-</span>' : b.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</th>`;
     }
     
     const mUsoRec = mesesRec > 0 ? somaTotalRec / mesesRec : 0; const mUsoDesp = mesesDesp > 0 ? somaTotalDesp / mesesDesp : 0; const mUsoBal = mesesBal > 0 ? somaTotalBal / mesesBal : 0;

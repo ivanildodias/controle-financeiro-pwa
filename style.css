@@ -80,6 +80,7 @@ body.menu-colapsado .sidebar-menu li a .material-icons { margin-right: 0; }
 .segmented-control { display: inline-flex !important; background: var(--bg-principal); border-radius: 6px; padding: 4px; border: 1px solid var(--borda); height: auto !important; align-items: center; }
 .btn-visao { flex: 1; background: transparent; border: none; padding: 6px 12px !important; border-radius: 4px; cursor: pointer; font-weight: 600; color: var(--texto-suave); font-size: 0.85rem; transition: all 0.2s; text-align: center; white-space: nowrap !important; }
 .btn-visao.active { background: var(--bg-card); color: var(--texto-principal); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.btn-visao:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-visao-sm { padding: 4px 8px !important; }
 .select-destaque { font-weight: bold; font-size: 0.95rem; color: var(--cor-destaque); min-width: 140px; border-width: 2px; padding: 8px 12px !important; height: auto !important; border-radius: 6px; background-color: var(--bg-card); }
 /* Caixas de Agrupamento */
@@ -206,6 +207,7 @@ body[data-theme="dark"] .skeleton { background: linear-gradient(90deg, var(--bg-
 .offline-banner.hidden { transform: translateY(-100%); display: flex !important; }
 /* Componente de Estado Vazio (Zero Inline Styles) */
 .estado-vazio { text-align: center; padding: 50px 20px; background: var(--bg-principal); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.estado-vazio-card { text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 8px; border: 1px dashed var(--borda); display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .estado-vazio-icon { font-size: 3rem !important; color: var(--borda); margin-bottom: 10px; }
 .estado-vazio-titulo { margin: 0; color: var(--texto-principal); font-size: 1.1rem; font-weight: bold; }
 .estado-vazio-texto { margin: 5px 0 0 0; color: var(--texto-suave); font-size: 0.9rem; }
@@ -272,6 +274,12 @@ body[data-theme="dark"] .notificacao-item:hover { box-shadow: 0 4px 12px rgba(0,
 .carousel-cards { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-snap-type: x mandatory; width: 100%; }
 .carousel-cards::-webkit-scrollbar { display: none; }
 .carousel-card { flex: 0 0 280px; height: 320px; scroll-snap-align: start; background: var(--bg-card); border: 1px solid var(--borda); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); position: relative; }
+.carousel-card-header { padding: 16px; background: var(--bg-principal); border-bottom: 1px solid var(--borda); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; overflow: hidden; flex-shrink: 0; }
+.card-watermark-top { position: absolute; font-size: 90px !important; right: -15px; top: -15px; color: var(--texto-principal); opacity: 0.05; pointer-events: none; }
+.card-watermark-lg { position: absolute; font-size: 140px !important; left: -20px; bottom: -20px; color: var(--texto-principal); opacity: 0.05; pointer-events: none; }
+.progress-track { width: 100%; height: 4px; background: var(--borda); border-radius: 9999px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 9999px; opacity: 0.85; }
+.progress-fill-futura { height: 100%; background: var(--texto-suave); opacity: 0.5; }
 /* Painel de Crédito */
 .triade-credito { display: flex; gap: 10px; margin-bottom: 20px; }
 .triade-item { flex: 1; background: var(--bg-principal); padding: 12px; border-radius: 8px; border: 1px solid var(--borda); text-align: center; }
@@ -284,10 +292,25 @@ body[data-theme="dark"] .notificacao-item:hover { box-shadow: 0 4px 12px rgba(0,
 .card-valor-principal { display: block; font-size: 1.1rem; font-weight: 800; color: var(--texto-principal); }
 .card-valor-abatido { font-size: 0.75rem; color: var(--cor-sucesso); }
 .badge-selo { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+.selo-paga { background: rgba(46, 204, 113, 0.15); color: var(--cor-sucesso); }
+.selo-atrasada { background: rgba(231, 76, 60, 0.15); color: var(--cor-perigo); }
+.selo-fechada { background: rgba(243, 156, 18, 0.15); color: var(--cor-aviso); }
+.selo-aberta { background: rgba(52, 152, 219, 0.15); color: var(--cor-destaque); }
+.selo-futura { background: rgba(149, 165, 166, 0.15); color: var(--texto-suave); display: inline-flex; align-items: center; gap: 2px; }
 .credito-nome-selo { display: flex; align-items: center; gap: 8px; }
 .credito-nome-selo .badge-selo { margin-left: 0 !important; }
 .credito-footer-grid { display: flex; justify-content: space-between; width: 100%; font-size: 0.65rem; color: var(--texto-suave); margin-top: 8px; }
 #cred-resumo-ativa > div:only-child, #cred-resumo-ativa > div:last-child { margin-bottom: 0 !important; }
+/* Gráfico Donut e Ranking Top 5 */
+.donut-box { width: 110px; height: 110px; position: relative; flex-shrink: 0; }
+.donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.donut-slice { transition: all 0.3s ease; cursor: pointer; }
+.donut-info { display: flex; flex-direction: column; justify-content: center; width: 150px; flex-shrink: 0; }
+.rank-badge { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.65rem; font-weight: bold; flex-shrink: 0; }
+.rank-1 { background: #f1c40f; color: #8a6d00; }
+.rank-2 { background: #bdc3c7; color: #444444; }
+.rank-3 { background: #cd7f32; color: #ffffff; }
+.rank-default { background: var(--cor-destaque); color: #ffffff; }
 /* Tabela Pivot Anual */
 .pivot-table { white-space: nowrap; min-width: 1000px; border-collapse: separate; border-spacing: 0; width: 100%; }
 .pivot-table th, .pivot-table td { padding: 7px 8px; font-size: 0.75rem; vertical-align: middle; border: none !important; }
@@ -309,6 +332,7 @@ body[data-theme="dark"] .notificacao-item:hover { box-shadow: 0 4px 12px rgba(0,
 .row-total-sub:last-child th, .row-total-sub:last-child td { border-bottom: 0 !important; }
 .pivot-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; background: var(--bg-principal) !important; margin: 0 !important; padding: 20px !important; border-radius: 0 !important; display: flex; flex-direction: column; }
 .pivot-fullscreen #dashListaPivotAnual { max-height: calc(100vh - 80px) !important; flex-grow: 1; }
+.pivot-zero { color: var(--borda); font-weight: normal; }
 
 /* ==========================================================================
    6. TELA: LANÇAMENTOS E TABELAS
@@ -549,6 +573,7 @@ body[data-theme="dark"] .card-lancamento.card-selecionado { background-color: rg
 .py-2 { padding-top: 8px !important; padding-bottom: 8px !important; }
 .py-3 { padding-top: 12px !important; padding-bottom: 12px !important; }
 /* Tipografia */
+.text-2xs { font-size: 0.65rem !important; }
 .text-xs { font-size: 0.75rem !important; }
 .text-sm { font-size: 0.85rem !important; }
 .text-base { font-size: 0.95rem !important; }
@@ -565,6 +590,8 @@ body[data-theme="dark"] .card-lancamento.card-selecionado { background-color: rg
 .text-right { text-align: right !important; }
 .resize-none { resize: none !important; }
 .resize-y { resize: vertical !important; }
+.leading-none { line-height: 1 !important; }
+.leading-tight { line-height: 1.25 !important; }
 .leading-relaxed { line-height: 1.5 !important; }
 .truncate { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
 .whitespace-nowrap { white-space: nowrap !important; }
@@ -599,6 +626,7 @@ body[data-theme="dark"] .card-lancamento.card-selecionado { background-color: rg
 .border { border: 1px solid var(--borda) !important; }
 .border-dashed { border-style: dashed !important; }
 .border-t-dashed { border-top: 1px dashed var(--borda) !important; border-right: none !important; border-bottom: none !important; border-left: none !important; }
+.border-b-dashed { border-bottom: 1px dashed var(--borda) !important; }
 .border-t { border-top: 1px solid var(--borda) !important; }
 .border-t-4 { border-top-width: 4px !important; }
 .border-b { border-bottom: 1px solid var(--borda) !important; }
